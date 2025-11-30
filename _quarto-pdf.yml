@@ -1,0 +1,39 @@
+project:
+  output-dir: .
+
+book:
+  date-format: "最終更新: YYYYYY年MM月DD日"
+  chapters:
+    - index.qmd
+    - text: RBC Model
+      file: 01-rbc.qmd
+    - text: New Keynesian
+      file: 02-nk.qmd
+    - text: DMP Framework
+      file: 03-dmp.qmd
+  appendices: 
+    - 11-linearization.qmd
+    - 12-proofs.qmd
+    - 13-foundation.qmd
+    - references.qmd
+
+format:
+  pdf:
+    documentclass: ltjsbook
+    mainfont: TeX Gyre Termes
+    CJKmainfont: Harano Aji Mincho
+    sansfont: Harano Aji Gothic
+    monofont: JuliaMono
+    include-in-header:
+      - text: |
+          \definecolor{primary}{HTML}{0F6A81}
+          \ltjsetparameter{jacharrange={-2, -3}}
+    linkcolor: primary
+    citecolor: primary
+    urlcolor: primary
+    geometry:
+      - margin=1in
+
+execute:
+  echo: false
+

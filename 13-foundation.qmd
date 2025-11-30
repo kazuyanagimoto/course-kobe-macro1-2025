@@ -1,0 +1,385 @@
+---
+engine: julia
+---
+
+# Foundations
+
+```{julia}
+#| label: setup-proof
+#| output: false
+#| code-fold: true
+using Plots
+using Distributions
+using Roots
+using LaTeXStrings
+import Random
+Random.seed!(1234)
+mypalette = ["#d5968c", "#c2676d", "#5c363a", "#995041", "#45939c", "#0f6a81"]
+default(size=(500, 309), titlefontsize=10, fmt=:svg, palette=mypalette[[6, 2, 4, 3, 1, 5]])
+```
+
+## Labor Supply
+
+労働供給の賃金に対する弾力性には主に以下の3つがあります:
+
+1. Marshallian 弾力性: 所得を一定とした下での労働供給の弾力性
+2. Hicksian 弾力性: 効用のレベルを一定とした下での労働供給の弾力性
+3. Frisch 弾力性: 限界効用を一定にした下での労働供給の弾力性
+
+動学モデルでは各期の労働供給は将来の限界効用を所与として決定するため,　マクロ経済学で関心があるのは基本的に Frisch 弾力性です.
+
+### Frisch 弾力性
+
+$$
+V(a) = \max_{c, h, a'} u(c, h) + \beta V(a') \quad \text{s.t. } c + a' = (1 + r)a + wh
+$$
+
+$\lambda$ をラグランジュ乗数とした一階条件から $u_c(c, h) = \lambda$, $u_h(c, h) = -\lambda w$ より, 
+
+$$
+u_{cc} \frac{\partial c}{\partial w} + u_{ch} \frac{\partial h}{\partial w} = 0 \text{ and }
+u_{hc} \frac{\partial c}{\partial w} + u_{hh} \frac{\partial h}{\partial w} = -\lambda.
+$$
+
+これを $\frac{\partial h}{\partial w}$ について解くと,
+
+$$
+\frac{\partial h}{\partial w} = \frac{u_{h}}{u_{hh} - \frac{u_{ch}^2}{u_{cc}}} \frac{1}{w}.
+$$
+
+Frisch 弾力性 $\eta := \frac{\partial h}{\partial w}\frac{w}{h}$ より,
+
+$$
+\eta = \frac{u_{h}}{h\left(u_{hh} - \frac{u_{ch}^2}{u_{cc}}\right)}.
+$$
+
+### Frisch 弾力性: マクロ vs ミクロ
+
+マクロ経済学でよく用いられる (separable) なCRRA 効用関数を考えると,
+
+$$
+u(c, h) = \frac{c^{1-\sigma}}{1-\sigma} - \alpha \frac{h^{1+\phi}}{1+\phi} \Rightarrow \eta = \frac{1}{\phi}.
+$$
+
+@chetty2011 はメタ分析を行い, Frisch 弾力性の平均的な推定値を報告しました.
+
+- **ミクロ分析** (擬似実験, quasi-experiment): 0.82
+- **マクロモデル**: 2.84
+
+マクロモデルの結果は, RBCモデルなどで雇用は実質賃金よりも volatile であることを反映しています. この「マクロモデルの Frisch 弾力性はミクロ分析よりもかなり大きい」というPuzzleに関しては今も議論が続いています (e.g., @erosa2016).
+
+
+## AR(1) Process {#sec-ar1-process}
+
+::: {.callout-note}
+
+## AR(1) 過程
+
+AR(1) 過程 $\{x_{t}\}_{t=0}^{\infty}$ は以下のように表される.
+
+$$
+x_{t+1} = \bar{x} + \rho x_t + \varepsilon_{t}, \quad \varepsilon_t \overset{\text{iid}}{\sim} (0, \sigma^2).
+$$
+
+:::
+
+平均 $0$ で分散 $\sigma^2$ (有限) の i.i.d. な確率変数 ($\varepsilon_t$)  は特にホワイトノイズ (white noise) と言います. 以下の内容は, ホワイトノイズであれば同様に成り立ちますが, 実務上は正規分布 $\varepsilon_t \sim \mathcal{N}(0, \sigma^2)$ を仮定することが多いです.
+
+```{julia}
+#| label: fig-ar1-process
+#| fig-cap: AR(1) 過程のシミュレーション. $\bar{x} = 0, \rho = 0.9, \sigma = 0.01$.
+#| code-fold: true
+x̄ = 0.0
+ρ = 0.9
+σ = 0.01
+T = 100
+xs = fill(x̄, T)
+for t in 2:T
+    xs[t] = x̄ + ρ * xs[t-1] + rand(Normal(0, σ))
+end
+
+plot(1:T, xs, label=false, size=(500, 309))
+```
+
+
+::: {#prp-mean-var-ar1}
+
+## AR(1) 過程の平均と分散
+
+$$
+\mathbb{E}[x_t] = \frac{\bar{x}}{1-\rho}, \quad \text{Var}(x_t) = \frac{\sigma^2}{1-\rho^2}.
+$$
+
+:::
+
+_証明_
+
+$$
+\begin{aligned}
+\mathbb{E}[x_{t+1}] &= \mathbb{E}[\bar{x} + \rho x_t + \varepsilon_{t}]= \bar{x} + \rho \mathbb{E}[x_t] + 0\\
+\text{Var}(x_{t+1}) &= \text{Var}(\bar{x} + \rho x_t + \varepsilon_{t}) = 0 + \rho^2 \text{Var}(x_t) + \sigma^2.
+\end{aligned}
+$$
+
+$\mathbb{E}[x_{t+1}] = \mathbb{E}[x_t]$ かつ, $\text{Var}(x_{t+1}) = \text{Var}(x_t)$ より, 証明された.
+
+::: {#prp-ac-ar1}
+
+## AR(1) 過程の自己共分散 (Autocovariance)
+
+$$
+\text{Cov}(x_{t}, x_{t+k}) = \frac{\rho^{k}}{1-\rho^2}\sigma^2.
+$$
+
+:::
+
+_証明_
+
+$k = 1$ の時,
+
+$$
+\begin{aligned}
+\text{Cov}(x_{t}, x_{t+1})
+&= \text{Cov}(x_{t}, \bar{x} + \rho x_t + \varepsilon_{t}) \\
+&= \text{Cov}\rho(x_{t}, x_t) + \text{Cov}(x_{t}, \varepsilon_{t})\\
+&= \rho \text{Var}(x_t) + 0 \\
+&= \frac{\rho}{1-\rho^2}\sigma^2.
+\end{aligned}
+$$
+
+$k = l + 1$ の時, $\text{Cov}(x_{t}, x_{t+l})= \frac{\rho^{l}}{1-\rho^2}\sigma^2$ として, 
+
+$$
+\begin{aligned}
+\text{Cov}(x_{t}, x_{t+l+1})
+&= \text{Cov}(x_{t}, \bar{x} + \rho x_{t+l} + \varepsilon_{t+l}) \\
+&= \text{Cov}(x_{t}, \bar{x}) + \text{Cov}(x_{t}, \rho x_{t+l}) + \text{Cov}(x_{t}, \varepsilon_{t+l}) \\
+&= 0 + \rho \text{Cov}(x_{t}, x_{t+l}) + 0 \\
+&= \frac{\rho^{l+1}}{1-\rho^2}\sigma^2.
+\end{aligned}
+$$
+
+## Root Finding
+
+定常状態の計算や, 一階条件から解を求める際, 数値的に非線形方程式の根を求める必要があります. ここではその基礎である一変数の非線形方程式の根の探索方法を紹介します.
+
+例えば以下の最適化問題を考えてみましょう.
+
+$$
+\max_{c, l} \frac{c^{1-\gamma_c}}{1-\gamma_c} + \alpha_l \frac{l^{1-\gamma_l}}{1-\gamma_l} \quad \text{s.t.} \quad c = w (1-l)
+$${#eq-max-utility}
+
+この問題は以下の一階条件の解を求めることで解くことができます.
+
+$$
+w^{1-\gamma_c} (1-l)^{-\gamma_c} - \alpha_l l^{-\gamma_l} = 0.
+$$
+
+```{julia}
+#| label: fn-foc-crra
+#| output: false
+foc(l; w=1.0, γ_c=1.5, α_l=1.2, γ_l=1.5) =
+    w^(1 - γ_c) * (1 - l)^(-γ_c) - α_l * l^(-γ_l)
+```
+
+```{julia}
+#| code-fold: true
+#| label: fig-foc-crra
+#| fig-cap: FOC for CRRA utility
+plot(0.1:0.01:0.9, foc, label=L"w^{1-\gamma_c} (1-l)^{-\gamma_c} - \alpha_l l^{\gamma_l}", lw=2)
+hline!([0.0], ls=:dash, lw=2, label=false)
+```
+
+これは, 一般に解析解がありません ($\gamma_c = \gamma_l = 1$などを除く.) そのため, 数値計算を用いて解く必要があります. この様な一変数の非線形方程式 $f(x) = 0$ の解法として, 以下の2つの選択肢があります.
+
+1. **Non-bracketing method**: 初期値 $x_0$ からスタートして, $f(x_n)$ が十分0に近づくまで反復的に計算. (ニュートン法など)
+1. **Bracketing method**: 区間 $[a, b]$ を選び, 区間を狭めていくことで解を求める. (二分法など)
+
+一般に, Non-bracketing method は収束が速い代わりにその収束は保証されません. 一方で, Bracketing method は収束がわずかに遅い代わりに, 解が存在する区間を保証することができます. 以下では, その理由とそれぞれの適した利用場面を解説します.
+
+### Non-bracketing Methods
+
+Non-bracketing method は基本的には一階微分を利用し, 初期値 $x_0$ からスタートして反復的に解を求めます.
+ここでは, 最も古典的で簡単なニュートン法を紹介します.
+
+::: {.callout-tip}
+
+## ニュートン法
+
+1. 初期値 $x_0$ を選ぶ. また停止条件として十分小さい $\epsilon > 0$ を選ぶ.
+1. $x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$ を計算する.
+1. $|f(x_{n+1})| < \epsilon$ ならば停止し, $x_{n+1}$ を解として返す. そうでなければ, $n \leftarrow n+1$ として2に戻る.
+
+:::
+
+![Visualization of Newton Method](/static/cetz/newton_method.svg){#fig-newton-method width=80%}
+
+```{julia}
+#| label: find-zero-newton
+dfoc(l; w=1.0, γ_c=1.5, α_l=1.2, γ_l=1.5) =
+    w^(1 - γ_c) * γ_c * (1 - l)^(-γ_c - 1) + α_l * γ_l * l^(-γ_l - 1)
+
+find_zero((foc, dfoc), 0.5, Roots.Newton())
+```
+
+**Hybrid method**
+
+Juliaの`Roots.jl`のデフォルトのNon-bracketing method (`Order0()`)は, 厳密にはBracketing methodも一部利用します. また一階微分も必要としないため, より汎用的に利用することができます. ただし, 収束が速く収束が保証されない性質はNon-bracketing methodと同じです.
+
+```{julia}
+#| label: find-zero-hybrid
+l = find_zero(foc, 0.5)
+```
+
+
+**定義域の変換**
+
+Non-bracketing method では, $x_{n+1}$ の値を更新する際に, 必ずしも $x_{n+1}$ が定義域内にあることが保証されません. 例えば, 今回の例では 余暇時間ですので, $l \in (0, 1)$ ですが, 初期値や関数形によっては, $l < 0$ や $l > 1$ となる可能性があります.
+
+この場合, 端点解が存在するかどうかを確認する必要があります. 端点解が想定される場合は, 次節で説明するように Bracketing method を利用することが適しています. 今回の例では, 端点解が存在しないため ($l = 0, 1$ のどちらにおいても効用が負の無限大に発散するため), Non-bracketing method での解の収束が保証されています. 以下の様な定義域の変換を用いることで, 解の収束を保証することができます.
+
+::: {.callout-note}
+
+## 定義域の変換
+
+$x$ が区間 $(a, b)$ で定義されるとき, 以下の変換を用いて定義域を $(-\infty, \infty)$ にすることができる.
+
+$$
+x = \frac{a + b \exp y}{1 + \exp y}
+$$
+
+明らかに, $y \rightarrow -\infty$ のとき $x \rightarrow a$, $y \rightarrow \infty$ のとき $x \rightarrow b$ となる.
+
+:::
+
+今回の例では, $l = \frac{1}{1 + \exp(y)}$ (つまり[シグモイド関数](https://ja.wikipedia.org/wiki/%E3%82%B7%E3%82%B0%E3%83%A2%E3%82%A4%E3%83%89%E9%96%A2%E6%95%B0)) という変換を用いることができます.
+
+```{julia}
+#| label: find-zero-transform
+y = find_zero(y -> foc(1 / (1 + exp(y))), 0.0)
+l = 1 / (1 + exp(y))
+```
+
+### Bracketing Methods
+
+Bracketing method は, 解が存在する区間 $[a, b]$ を選び, その区間を狭めていくことで解を求めます. ここでは最も基本的な二分法を用いることで解を求めることができます.
+
+::: {.callout-tip}
+
+## 二分法
+
+1. 区間 $[a, b]$ を選ぶ. また停止条件として十分小さい $\epsilon > 0$ を選ぶ.
+1. $f(a) \cdot f(b) < 0$ ならば, $c = \frac{a + b}{2}$ を計算する.
+1. $|f(c)| < \epsilon$ ならば, $c$ を解として返す. そうでなければ, $f(a) \cdot f(c) < 0$ ならば, $b \leftarrow c$ として2に戻る. そうでなければ, $a \leftarrow c$ として2に戻る.
+
+:::
+
+
+![Visualization of Bisection Method](/static/cetz/bisection_method.svg){#fig-bisection-method width=80%}
+
+例えば, 今回の例では $l \in (0, 1)$ ですので, $l = 0$ と $l = 1$ で効用が発散することから, 解が存在する区間は $(0, 1)$ です. なお, 端点でFOCが定義されてない場合も多いので, 端点より微小に内側の区間を選ぶことが多いです.
+
+```{julia}
+#| label: find-zero-bracketing
+ϵ = 1e-9
+l = find_zero(foc, (ϵ, 1 - ϵ))
+```
+
+**端点解の存在**
+
+以下の様なカップルの意思決定問題を考えてみましょう.
+
+$$
+\max_{c_m, c_f, l_m, l_f} u(c_m, l_m) + u(c_f, l_f)
+$${#eq-couple-problem}
+
+subject to
+
+$$
+c_m + c_f = w_m (1 - l_m) + w_f (1 - l_f).
+$$
+
+一階条件から以下の関係が導けます:
+
+$$
+\frac{l_m}{l_f} = \left(\frac{w_f}{w_m}\right)^{\frac{1}{\gamma_l}}.
+$$
+
+この関係から一方の相対賃金が十分に大きい場合, 例えば $w_m \gg w_f$ の場合, $l_f > 1$ となる可能性があります ($l_m$ は余暇時間のため, 0よりある程度大きい値をとるということが想像できます.) 内点解が存在する場合の $l_f$ に関する一階条件は以下のようになります.
+
+$$
+w_m\left(1-\left(\frac{w_f}{w_m}\right)^{\frac{1}{\gamma_l}}l_f\right) + w_f(1-l_f) - 2\left(\frac{w_f}{\alpha_l}\right)^{\frac{1}{\gamma_c}}l_f^{\frac{\gamma_l}{\gamma_c}} = 0.
+$$
+
+```{julia}
+#| code-fold: true
+#| label: fig-foc-bargaining
+#| fig-cap: "**FOC for bargaining problem.** $w_m = 1.0$, $\\alpha_l = 1.2$, $\\gamma_c = \\gamma_l = 1.5$."
+
+function foc_bargaining(l_f; w_m=1.0, w_f=0.5, γ_c=1.5, α_l=1.2, γ_l=1.5)
+    return w_m * (1 - (w_f / w_m)^(1 / γ_l) * l_f) + w_f * (1 - l_f) -
+           2 * (w_f / α_l)^(1 / γ_c) * l_f^(γ_l / γ_c)
+end
+
+lf_grid = 0.01:0.01:0.99
+plot(lf_grid, l_f -> foc_bargaining(l_f, w_f=1.0), label=L"w_f = 1.0", xlabel=L"l_f")
+plot!(lf_grid, l_f -> foc_bargaining(l_f, w_f=0.5), label=L"w_f = 0.5", linestyle=:dash)
+plot!(lf_grid, l_f -> foc_bargaining(l_f, w_f=0.1), label=L"w_f = 0.1", linestyle=:dot)
+hline!([0.0], lw=2, label=false, color=:black)
+```
+
+
+また, $l_f = 1$ における一階条件は以下のようになります.
+
+$$
+w_m(1-l_m) - 2\left(\frac{w_m}{\alpha_l}\right)^{\frac{1}{\gamma_c}} l_m^{\frac{\gamma_l}{\gamma_c}} = 0.
+$$
+
+この様な場合, Bracketing method の考えが有効です.
+
+1. 端点 $l_m = 0, 1$ (実用上は $\epsilon, 1-\epsilon$) において, 一階条件の値を計算.
+1. 一階条件の値が異符号であれば, 二分法を用いて解を求める.
+1. 一階条件の値が同符号であれば, 端点解 (この場合, $l_f = 1$) 上の解を求める.
+
+```{julia}
+#| label: find-zero-bracketing-corner
+#| output: false
+function solve_bargaining(; w_m=1.0, w_f=0.5, γ_c=1.5, α_l=1.2, γ_l=1.5)
+
+    ϵ = 1e-9
+    left = w_m * (1 - (w_f / w_m)^(1 / γ_l) * ϵ) + w_f * (1 - ϵ) -
+           2 * (w_f / α_l)^(1 / γ_c) * ϵ^(γ_l / γ_c)
+    right = w_m * (1 - (w_f / w_m)^(1 / γ_l) * (1 - ϵ)) + w_f * ϵ -
+            2 * (w_f / α_l)^(1 / γ_c) * (1 - ϵ)^(γ_l / γ_c)
+
+    if left * right < 0
+        l_f = find_zero(
+            l_f -> w_m * (1 - (w_f / w_m)^(1 / γ_l) * l_f) + w_f * (1 - l_f) -
+                   2 * (w_f / α_l)^(1 / γ_c) * l_f^(γ_l / γ_c),
+            (ϵ, 1 - ϵ))
+        l_m = (w_f / w_m)^(1 / γ_l) * l_f
+    else
+        l_f = 1.0
+        x = find_zero(
+            x -> w_m * (1 - 1 / (1 + exp(x))) -
+                 2 * (w_m / α_l)^(1 / γ_c) * (1 / (1 + exp(x)))^(γ_l / γ_c),
+            0.0)
+        l_m = 1 / (1 + exp(x))
+    end
+
+    c = w_m * (1 - l_m) + w_f * (1 - l_f)
+    c_m = 0.5 * c
+    c_f = 0.5 * c
+    U = (c_m^(1 - γ_c) / (1 - γ_c)) + α_l * (l_m^(1 - γ_l) / (1 - γ_l)) +
+        (c_f^(1 - γ_c) / (1 - γ_c)) + α_l * (l_f^(1 - γ_l) / (1 - γ_l))
+    return (c_m=c_m, c_f=c_f, l_m=l_m, l_f=l_f, U=U)
+end
+```
+
+```{julia}
+#| code-fold: true
+#| label: fig-sol-bargaining
+#| fig-cap: "**Solution of bargaining problem.** $w_m = 1.0, \\alpha_l = 1.2, \\gamma_c = \\gamma_l = 1.5$."
+plot(0.1:0.01:0.9, w_f -> solve_bargaining(w_f=w_f).l_m, label=L"l_m", xlabel=L"w_f")
+plot!(0.1:0.01:0.9, w_f -> solve_bargaining(w_f=w_f).l_f, label=L"l_f", linestyle=:dash)
+```

@@ -1,0 +1,693 @@
+---
+engine: julia
+---
+
+# New Keynesian Model
+
+```{julia}
+#| label: setup-nk
+#| code-fold: true
+#| output: false
+using DataFrames
+using LaTeXStrings
+using StatsPlots
+using MacroModelling: @model, @parameters, get_irf
+using PrettyTables
+
+mypalette = ["#d5968c", "#c2676d", "#5c363a", "#995041", "#45939c", "#0f6a81"]
+default(size=(600, 370), titlefontsize=10, fmt=:svg,
+    palette=mypalette[[6, 2, 4, 3, 1, 5]])
+```
+
+## New Keynesian Model とは
+
+New Keynesian Model とは, RBCモデルに名目の硬直性 (nominal rigidity) を加えたモデルです. 名目賃金や名目価格が調整されるまでの時間がかかることを考慮し, このような価格や賃金を sticky price や sticky wage と呼びます. これにより, 短期的な価格の硬直性が生じ, 経済の変動に対する反応が遅れることになります. その結果, 名目変数 (貨幣供給や金利) が実体経済に影響を与えることが可能になります.
+
+$$
+\text{New Keynesian Model} = \text{RBC Model} + \text{Nominal Rigidity}.
+$$
+
+Dynamic Stochastic General Equilibrium (DSGE) モデルという呼称もありますが, これはRBCモデルやNew Keynesianモデルを含む, より一般的な呼称です. この授業ではRBCモデルと区別するためにNew Keynesianモデルと呼ぶことにします.
+
+## Nominal Rigidity
+
+### Nominal vs. Real
+
+ここで, 価格, 名目値と実質値という概念を導入します.
+
+- $P_t$: 名目価格 (nominal price). または物価水準 (price level)
+- $i_t$: 名目金利 (nominal interest rate)
+
+この時, インフレ率 (inflation rate) $\pi_t$ は以下のように定義されます.
+
+$$
+\pi_t = \frac{P_t - P_{t-1}}{P_{t-1}}.
+$$
+
+今までのRBCモデルでは, 金利は実質金利 (real interest rate) $r_t$ として扱ってきました. ここでいう実質金利とは, 名目金利からインフレ率を差し引いたものであり, 以下のように定義されます.
+
+$$
+1 + r_t := \frac{1 + i_t}{1 + \pi_{t+1}}.
+$$
+
+また, $r_t \pi_{t+1}$ は無視できるほど十分小さいので, 近似的に以下のように表せます.
+
+$$
+r_t \approx i_t - \pi_{t+1}.
+$$
+
+これをフィッシャー方程式 (Fisher Equation) と呼びます.
+
+### Monetary Neutrality in RBC Model
+
+RBCモデルに価格がなぜ登場しなかったかというと, RBCモデルでは価格が完全に柔軟 (flexible) であると仮定しており, 価格が経済に影響を与えない **貨幣中立性 (monetary neutrality)** が成立しているからです.
+
+ここで, 従来のRBCモデルに価格 $P_t$ を導入してみます. 単純化のために, 生産関数を $y_t = w_t n_t$ とし, 名目貯蓄を $A_t$ とします. すると,
+家計の予算制約は以下のようになります.
+
+$$
+P_t c_t + A_{t} = P_t w_t n_t + (1 + i_t) A_{t-1}.
+$$
+
+これを $P_t$ で割ると, $a_t = \frac{A_t}{P_t}$ とすると,
+
+$$
+c_t + a_{t} = w_t n_t + \underbrace{\frac{1 + i_t}{1 + \pi_t}}_{= 1 + r_t} a_{t-1}.
+$$
+
+企業の利潤は以下であり, $P_t$ で割っても実質値 $y_t, w_t, n_t$ に影響しません.
+$$
+\Pi_t = P_t y_t - P_t w_t n_t.
+$$
+
+次節以降では, 企業の価格改訂コストを導入することで, 価格が実質値に影響を与えるようにします.
+
+### Origin of Nominal Rigidity
+
+モデル上では抽象的な価格の硬直性を導入しますが, 具体的には以下のような理由で価格や賃金が硬直的になると考えられています.
+
+- **メニューコスト** (menu cost): 価格を変更する際に, 印刷や広告などのコストがかかるため, 企業は頻繁に価格を変更しない
+- **合理的無関心** (rational inattention): 情報を収集し処理することにはコストがかかるため, 企業は合理的に情報を無視し, 価格を頻繁に変更しない
+
+![Chart 2 from @goldberg2007](/static/img/02-nk/goldberg2007_chart2.svg){#fig-goldberg2007 width=80%}
+
+実証的にも価格の硬直性は観測されており, @fig-goldberg2007 はビールの価格があまり頻繁に変更されないことを示しています.
+
+## Model
+
+### IS-MP-PC モデル
+
+New Keynesian モデルの基本的な枠組みはRBCモデルに価格硬直性を加えたものです. モデルの設定は次節以降で詳しく説明しますが, 最終的には以下の3つの式に集約されます.
+
+$$
+\begin{aligned}
+\widetilde{Y}_t &= \mathbb{E}_t[\widetilde{Y}_{t+1}] - \frac{1}{\sigma}\left(i_t - r_t^n -\mathbb{E}[\pi_{t+1}]\right) & \text{(NK IS Curve)} \\
+\pi_{t} &= \beta \mathbb{E}_t[\pi_{t+1}] + \kappa \widetilde{Y}_t & \text{(NK Phillips Curve)} \\
+i_t &= r_t + \phi_{\pi}\pi_t + \phi_y \widetilde{Y}_t & \text{(MP Rule)}\\
+\end{aligned}
+$$
+
+- $\widetilde{Y}_t$: 産出ギャップ (output gap)
+- $i_t$: 名目金利
+- $\pi_t$: インフレ率
+- $r_t^n$: 自然利子率 (natural interest rate)
+
+なおこの方程式は線形であるため, 全てを100倍にしたパーセント表記にしても同じです. 導出の過程では扱いやすい実際の値 ($\pi_t$ = 0.01 ならば1%のインフレ率) で扱いますが, IS-MP-PCの形になった後は, パーセントとして扱って ($\pi_t = 1$ ならば1%のインフレ率) も問題ありません. 実務上はパーセントとして扱っているものが多いです.
+
+**Flexible Price Equilibrium**
+
+金融政策を考える際にベンチマークとして, 価格が完全に柔軟である場合の均衡状態を考えます. これを自然 (natural) な状態と呼びび, $x_t^n$ のように表します. 産出ギャップ $Y_t^n$ は自然水準との対数差で定義されます.
+
+$$
+\widetilde{Y}_t := \log Y_t - \log Y_t^n.
+$$
+
+### 設定
+
+**公共セクター**
+
+- 中央銀行は名目利子率を制御する金融ルール (Monetary Policy Rule) を持つ
+- 政府は (この授業のモデルでは) 考慮しない
+
+**民間セクター**
+
+- 民間セクターは, 家計, 中間財企業, 最終財企業から構成される
+- 家計は最終財を消費し, 中間財企業に労働を供給する
+- 最終財企業は中間財企業から中間財を調達し, 最終財を生産する (完全競争)
+- 中間財企業は差別化された中間財を生産し, 最終財企業に販売する (独占的競争)
+
+**@rotemberg1982 vs. @calvo1983**
+
+価格の硬直性を考慮する際に, 価格の調整がどのように行われるかについては2つのアプローチがあります.
+
+- **@rotemberg1982**: 価格の調整はコストがかかるとし, 価格を調整する企業はそのコストを考慮して価格を設定する
+- **@calvo1983**: 価格の調整は確率的に行われるとし, 各企業が価格を調整する確率を一定とする
+
+IS-MP-PC のような線形化されたモデルでは, どちらのアプローチを用いても同じ結果になりますが, 非線形のまま数値計算を行う場合は結果が少し異なります. 二つのモデルの違いについては @ascari2012 などを参照してください. この授業では, 線形化したモデルを扱うことと, 導出が平易なことから @rotemberg1982 のアプローチを採用します.
+
+
+### 家計
+
+代表的な家計は以下の期待割引価値を最大化すると考えます.
+
+$$
+U_0 = \mathbb{E}_0 \sum_{t=0}^{\infty} \beta^t \left(\frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi}\right)
+$$
+
+- $C_t$: (最終財) 消費
+- $N_t$: 労働供給
+
+家計の各期の予算制約は以下のようになります.
+
+$$
+P_t C_t + \frac{1}{1 + i_{t}} B_{t} = W_t N_t + \Pi_t + B_{t-1}.
+$$
+
+- $P_t$: 最終財価格
+- $B_{t}$: 名目債券 (nominal bond) の一期保有量 (one-period bond holdings)
+- $i_t$: 名目金利 (nominal interest rate)
+- $W_t$: 名目賃金 (nominal wage)
+- $\Pi_t$: 企業の名目利益 (nominal profits)
+
+**ベルマン方程式**
+
+$$
+\begin{aligned}
+V(B_t) &= \max_{C_t, N_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}[V(B_{t+1})] \\
+&=\max_{C_t, N_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}\left[V\left((1+i_t)(W_t N_t + \Pi_t + B_{t-1} - P_t C_t)\right)\right]
+\end{aligned}
+$$
+
+**最適条件**
+
+$$
+\begin{aligned}
+C_t^{-\sigma} &= \beta (1+i_t) P_t \mathbb{E}\left[V'(B_{t})\right] & \text{(FOC of $C_t$)} \\
+N_t^{\phi} &= \beta (1+i_t) W_t \mathbb{E}\left[V'(B_{t})\right] & \text{(FOC of $N_t$)}\\
+V'(B_{t-1}) &= \beta (1+i_t)\mathbb{E}\left[V'(B_{t})\right] & \text{(EC of $B_t$)}
+\end{aligned}
+$$
+
+ここから, $V'(B_{t-1}) = \frac{C_t^{-\sigma}}{P_t}$ より, 
+
+$$
+\begin{aligned}
+C_t^{-\sigma} &= \beta \mathbb{E}\left[\frac{P_t}{P_{t+1}} (1+i_t)C_{t+1}^{-\sigma}\right] & \text{(Euler equation)} \\
+C_t^{-\sigma}\frac{W_t}{P_t} &= N_t^{\phi} & \text{(Intratemporal labor supply)}
+\end{aligned}
+$${#eq-opt-household}
+
+
+### 企業
+
+**生産**
+
+消費者は最終財 (final good) を消費します. 最終財は代表的企業が中間財 $j \in [0, 1]$ を以下のCES生産関数で生産します.
+
+$$
+Y_t = \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \right)^{\frac{\varepsilon}{\varepsilon - 1}}.
+$$
+
+- $Y_{j, t}$: 中間財 $j$ の生産量
+- $\varepsilon$: 代替弾力性 (elasticity of substitution)
+
+中間財は以下の線形生産関数で生産されます.
+
+$$
+Y_{j, t} = A_t N_{j, t}
+$$
+
+**価格**
+
+最終財の価格 $P_t$ は中間財の価格 $P_{j, t}$ を用いて以下のように表されます.
+
+$$
+P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon}\right)^{\frac{1}{1-\varepsilon}}.
+$$
+
+証明は @prp-price-index を参照してください.
+
+中間財の価格 $P_{j, t}$ は, 企業 $j$ が独占的に設定します. このコストは, 最終財で計測され, 以下の @rotemberg1982 型の価格改訂コストがかかります.
+
+$$
+\frac{\varphi}{2}\left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)^2 Y_t.
+$$
+
+中間財企業は, 賃金 $W_t$ を (プライステイカーとして) 支払います. そのため, 中間財企業 $j$ の限界費用 (marginal cost) は以下のように表されます.
+
+$$
+MC_{j, t} = \frac{W_t}{A_t}
+$$
+
+これは, 企業ごとに同一のため $MC_{t}$ と表記します.
+
+**最適化問題**
+
+中間財企業 $j$ は以下の価値関数を最大化します.
+
+$$
+\max_{\{P_{j, t}\}_{t=0}^{\infty}} \mathbb{E}_{0} \sum_{t=0}^{\infty} D_{t} \left[
+    \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)Y_{j, t} -
+    \frac{\varphi}{2}\left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)^2 Y_t
+\right]
+$$
+
+ここで, $D_t := \beta^t \frac{U_{c}(t)}{U_{c}(0)}$ は**確率的割引因子**（stochastic discount factor）です.
+
+- 企業の所有者は代表的家計であり、企業価値は家計の効用で測定される
+- $U_c(t) = C_t^{-\sigma}$ は $t$ 期の消費の限界効用
+- $U_c(0)$ で割ることで, 0期時点の効用を基準に相対的な価値を表す
+- 最終財の価格を基準に考えるため, 実質限界費用 $MC_{t}^{r} = \frac{W_t}{A_t P_t}$ を用います.
+
+ここから以下のベルマン方程式を得ます.
+
+$$
+V(P_{j, t-1}) = \max_{P_{j, t}} \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)Y_{j, t} - \frac{\varphi}{2}\left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)^2 Y_{t} + \mathbb{E}_{t}[D_{t+1}V(P_{j, t})].
+$$
+
+**最適価格**
+
+中間財需要 $Y_{j, t} = \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon}Y_t$ を代入すると, ベルマン方程式は以下のようになります.
+
+$$
+V(P_{j, t-1}) = \max_{P_{j, t}} \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)\left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon}Y_t - \frac{\varphi}{2}\left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)^2 \left(\frac{P_{j, t}}{P_{t}}\right)^{-\varepsilon} Y_t + \mathbb{E}_{t}[D_{t+1}V(P_{j, t})].
+$$
+
+最適化条件は以下のようになります.
+
+$$
+\left((1-\varepsilon)\left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon} + \varepsilon MC_{t}^{r} \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon-1}\right)\frac{Y_t}{P_t} -
+\varphi \left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)\frac{Y_t}{P_{j, t-1}} + \mathbb{E}_{t}[D_{t+1}V'(P_{j, t})] = 0
+$$
+
+$$
+V'(P_{j, t-1}) = \varphi \left(\frac{P_{j,t}}{P_{j, t-1}} - 1\right)\frac{P_{j, t}}{P_{j, t-1}^2}Y_t
+$$
+
+対称均衡を仮定すると, 全ての企業は同じ価格を設定するため, $P_{j, t} = P_t$ とおけます. これにより, 次の式を得ます.
+
+$$
+(1-MC_{t}^r)\varepsilon = 1 - \varphi\pi_{t}(1+\pi_{t}) + \varphi \beta\mathbb{E}_t\left[
+  \left(\frac{C_{t+1}}{C_{t}}\right)^{-\sigma}\pi_{t+1}(1+\pi_{t+1})\frac{Y_{t+1}}{Y_t}
+\right].
+$${#eq-opt-price}
+
+ここで $1 + \pi_{t} := \frac{P_{t}}{P_{t-1}}$ とおきました.
+
+### 均衡
+
+**Market clearing**
+
+$$
+\begin{aligned}
+N_t &= \int N_{j, t} \,dj & \text{Labor Market Clearing} \\
+Y_t &= C_t & \text{Goods Market Clearing}
+\end{aligned}
+$$
+
+@rotemberg1982 型のモデルでは, 価格改訂のコストを
+
+1. 意思決定に影響を及ぼすが, 実体経済に直接的な影響を与えない
+1. 価格改訂には, 最終財の生産量に依存するコストがかかる
+
+という2つの考え方があります. $Y_t = C_t$ という条件はこの1つ目の考え方に基づいています. 2つ目の考え方は Exercise で扱います.
+
+### Flexible Price Equilibrium
+
+価格が柔軟である場合, 価格の改定にはコストがかかりません. すなわち, ベルマン方程式は以下のようになります.
+
+$$
+V(P_{j, t-1}) = \max_{P_{j, t}} \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)Y_{j, t} + \mathbb{E}_{t}[D_{t+1}V(P_{j, t})].
+$$
+
+この時, $P_{j, t-1}$ に依存しないため, state variables にもなりません. したがって, さらに書き換えると,
+
+$$
+V = \max_{P_{j, t}} \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)Y_{j, t} + \mathbb{E}_{t}[D_{t+1}V].
+$$
+
+$Y_{j, t} = \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon}Y_t$ を代入し, 最適化条件を求めると,
+
+$$
+(1-\varepsilon)\left(\frac{P_{j,t}}{P_t}\right)^{-\varepsilon} = MC_{t}^{r}(-\varepsilon)\left(\frac{P_{j,t}}{P_t}\right)^{-\varepsilon-1}.
+$$
+
+対称均衡を仮定すると, $P_{j, t} = P_t$ より, 以下の式を得ます.
+
+$$
+MC_{t}^{r} = \frac{\varepsilon - 1}{\varepsilon} =: \frac{1}{\mu}.
+$$
+
+Flexible price の均衡における値を $X^n$ で表すと,
+
+$$
+\begin{aligned}
+Y_t^n &= A_t N_t^n \\
+MC_{t}^{r, n} &= \frac{W_t^n}{A_t P_t^n} = \frac{1}{\mu} \\
+\frac{W_t^n}{P_t^n} &= {C_t^n}^{\sigma} {N_t^{n}}^{\phi} \\
+Y_t^n &= C_t^n
+\end{aligned}
+$$
+
+これらを整理すると, 以下の式を得ます.
+
+$$
+Y_t^n = \mu^{-\frac{1}{\sigma + \phi}} A_t^{\frac{1+\phi}{\sigma + \phi}}.
+$${#eq-output-flexible}
+
+なお, 対数線形化すると自明に
+
+$$
+\hat{Y}_t^n = \frac{1+\phi}{\sigma + \phi} \hat{A}_t.
+$${#eq-lin-output-flexible}
+
+## IS-MP-PC の導出
+
+ここでは, 定常状態におけるゼロインフレ率 $\pi = 0$ を仮定します. ほとんどの論文ではこれを仮定しますが, 仮定しない場合は ISとPCの形は複雑になります. 詳細は @ascari2012 を参照してください.
+
+また, ゼロインフレでは価格改訂が起こらないので, 定常状態では価格改訂コストは存在しません. したがって, 定常状態では柔軟価格均衡と同じ値を取ります $(Y = Y^n)$.
+
+### New Keynesian IS Curve
+
+@eq-opt-household のオイラー方程式から導出します.
+
+$$
+C_t^{-\sigma} = \beta \mathbb{E}_t\left[\frac{1+i_t}{1+\pi_{t+1}}C_{t+1}^{-\sigma}\right]
+$$
+
+これを対数線形化すると (@prp-lin-nkis), 以下の式を得ます.
+
+$$
+\hat{C}_t = \mathbb{E}_t[\hat{C}_{t+1}] - \frac{1}{\sigma}\left(i_t - \log \beta - \mathbb{E}_t[\pi_{t+1}] \right)
+$$
+@lem-output-gap より, 産出ギャップは $\widetilde{Y}_t = \hat{Y}_t - \hat{Y}_t^n$ であり, @eq-lin-output-flexible を用いると,
+
+$$
+\hat{Y}_t = \widetilde{Y}_t + \frac{1+\phi}{\sigma + \phi} \hat{A}_t.
+$$
+
+Good Market Clearing ($C_t = Y_t$) より, $\hat{C}_t = \hat{Y}_t$ なので,
+
+$$
+\widetilde{Y}_t = \mathbb{E}_t[\widetilde{Y}_{t+1}] - \frac{1}{\sigma}\left(i_t - r_t^n - \mathbb{E}_t[\pi_{t+1}]\right)
+$${#eq-nk-is}
+
+ここで, 自然利子率 $r_t^n$ は以下で定義されます.
+
+$$
+r_t^n := -\log \beta + \frac{\sigma(1+\phi)}{\sigma + \phi}\left(\hat{A}_t - \mathbb{E}\left[\hat{A}_{t+1}\right]\right).
+$$
+
+定常状態では明らかに $r^n = -\log \beta$ となります.
+
+### New Keynesian Phillips Curve
+
+@eq-opt-price の式を用いて, 価格の硬直性を考慮したフィリップス曲線を導出します.
+
+$$
+(1-MC_{t}^r)\varepsilon = 1 - \varphi\pi_{t}(1+\pi_{t}) + \varphi \beta\mathbb{E}_t\left[
+  \left(\frac{C_{t+1}}{C_{t}}\right)^{-\sigma}\pi_{t+1}(1+\pi_{t+1})\frac{Y_{t+1}}{Y_t}
+\right].
+$$
+
+これを対数線形化すると (@prp-lin-nkpc), 以下の式を得ます.
+
+$$
+\begin{aligned}
+\pi_t&= \beta \mathbb{E}[\hat{\pi}_{t+1}] + (1-\beta)\pi +
+\frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} \\
+&+\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right]
+\end{aligned}
+$$
+
+$\pi = 0$ より,
+
+$$
+\hat{\pi}_{t} = \beta \mathbb{E}\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} \widehat{MC^r}_{t}.
+$$
+
+@lem-lin-mc を用いて,
+
+$$
+\hat{\pi}_{t} = \beta \mathbb{E}\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} (\sigma+\phi)\widetilde{Y}_t.
+$$
+
+$\kappa = \frac{(\varepsilon-1)(\sigma+\phi)}{\varphi}$ とすると,
+
+$$
+\pi_t = \beta \mathbb{E}\left[\pi_{t+1}\right] + \kappa \widetilde{Y}_t.
+$${#eq-nk-pc}
+
+
+### Monetary Policy Rule (Taylor Rule)
+
+@taylor1993 は1987-1992年の Federal Reserve の政策を分析し, 以下のようなルールを提案しました.
+
+$$
+i_t = r^n + \phi_{\pi}(\pi_t - \pi^*) + \phi_y \widetilde{Y}_t
+$${#eq-taylor-rule}
+
+@taylor1993 では $\phi_{\pi} = 1.5$, $\phi_{y} = 0.5$ としています. 解釈としては,
+
+- $\phi_{\pi} > 1$ の場合, インフレ率が目標を上回るとき, 金利を上げることでインフレを抑制しようとする
+- $\phi_y > 0$ の場合, GDPギャップが正のとき, 金利を上げることで景気を抑制しようとする
+
+FRB of Atlanta の [Taylor Rule Utility](https://www.atlantafed.org/cqer/research/taylor-rule) では, いくつかのモデルやパラメータを指定して, Taylor Rule と実際の金利 (Fed Funds Rate) の比較を行うことができます [@fig-taylor-rule]. "Alternative 3" として表示されているルールが @taylor1993 のルールに近いものです. @taylor1993 の観測した1987-1992年の期間をよく説明しているだけでなく, その後の期間もある程度説明できていることがわかります. 
+
+![Taylor Rules from Fedral Reserve Bank of Atlanta.](/static/img/02-nk/atlanta-fed_taylor-rule.svg){#fig-taylor-rule width=90%}
+
+なお, 実際の金利は金利ゼロ制約 (Zero Lower Bound, ZLB) によって制約されるため, 超低金利の場合では Taylor Rule が適用できないことに注意してください. ZLBを考慮した数値計算モデルとしては, @adam2007 などがあり, @kitao2024 の7章で詳しく説明されています.
+
+## Simulation
+
+ここからは, Impulse Response Function (IRF) をシミュレーションしていきます. また, 単純化のため, 中央銀行の目標インフレ率は $\pi^* = 0$ とします. これは, 定常状態のインフレ率を0と仮定していることと整合的になるからです.^[
+  Taylor Rule が実証的には2%をターゲットとしていることと整合的でないことに注意してください. 定常状態のインフレ率が0でないと仮定する場合は, NKIS, NKPCの形は少し複雑になります. 詳しくは @ascari2012 を参照してください.
+]
+
+### Calibration
+
+**Parameters**
+
+モデルの一期間は四半期とし, 以下のパラメータを設定します. @ascari2012 のパラメータを用います.
+
+::: {#tbl-nk-parameters tbl-colwidths="[30, 30]"}
+
+|   **Parameter**    | **Description**             |
+|:------------------:|:----------------------------|
+|    $\beta=0.99$    | $\beta = 0.96$ の四半期換算 |
+|     $\sigma=1$     | Log Utility                 |
+|      $\phi=1$      | Unitary Frisch elasticity   |
+| $\varepsilon=10.0$ | Literature                  |
+|  $\varphi=104.9$   | 脚注参照[^1]                |
+|  $\phi_{\pi}=1.5$  | @taylor1993                 |
+|  $\phi_{y}=0.125$  | @taylor1993 の四半期換算    |
+
+New Keynesian Model Parameters
+:::
+
+[^1]: @ascari2012 の中で, Calvo型の価格改訂確率を $1-\theta=0.25$ とした場合, 対応するRotemberga型の価格改訂コストは $\varphi=\frac{(\varepsilon-1)\theta}{(1-\theta)(1-\beta\theta)}$.
+
+
+**Monetary Policy Shocks**
+
+IRFをシミュレーションするために, @eq-taylor-rule に以下のショックを与えます.
+
+$$
+\begin{aligned}
+i_t &= r^n + \phi_{\pi}\pi_t + \phi_y \widetilde{Y}_t + \eta_t \\
+\eta_t &= \rho_{\eta} \eta_{t-1} + \sigma_{\eta} \epsilon_t.
+\end{aligned}
+$$
+
+IRFのシミュレーションでは, $t=0$ 時点で $\epsilon_t = 1$　とし, そのあとは $\epsilon_t = 0$ とします. @gali2015 のChapter 3に従い, $\rho_{\eta} = 0.5$, $\sigma_{\eta} = 0.25$ とします.
+
+### IRF from Scratch
+
+@eq-nk-is, @eq-nk-pc, @eq-taylor-rule を整理すると以下を得ます.
+
+$$
+\begin{pmatrix}
+\widetilde{Y}_t \\
+\pi_t
+\end{pmatrix}
+=\omega\underbrace{\begin{pmatrix}
+\sigma & 1-\beta\phi_{\pi} \\
+\sigma\kappa & \kappa+\beta(\sigma+\phi_y)
+\end{pmatrix}}_{\Lambda}
+\begin{pmatrix}
+\mathbb{E}[\widetilde{Y}_{t+1}] \\
+\mathbb{E}[\pi_{t+1}]
+\end{pmatrix}
++\omega\underbrace{\begin{pmatrix}
+1\\
+\kappa
+\end{pmatrix}}_{\mathbf{b}}
+\left(\hat{r}_t^n - \eta_t\right).
+$$
+
+ここで, $\omega = (\sigma+\phi_y+\phi_{\pi}\kappa)^{-1}$, $\hat{r}_t^n = r_t^n - r_t^n$ です. Monetary policy shocks は自然利子率に影響を与えないため, $\hat{r}_t^n = 0$ とします.
+
+このように, 期待演算子を含む線形システムが得られました. これを前方期待 (foward-looking) を含む線形モデルと呼び, このようなモデルを解くには guess-and-verify が有効です.
+
+このシステムの解が以下の形を満たすとします.
+
+$$
+\widetilde{Y}_t = \psi_y \eta_t, \quad \pi_t = \psi_{\pi} \eta_t.
+$$
+
+これを代入して, $(\psi_y, \psi_{\pi})$ に対して解くと,
+
+$$
+\begin{aligned}
+\begin{pmatrix}
+\psi_y\\\psi_{\pi}
+\end{pmatrix}\eta_t&=\omega \Lambda\begin{pmatrix}
+\psi_y\\\psi_{\pi}
+\end{pmatrix}\mathbb{E}[\eta_{t+1}] + \omega \mathbf{b} \eta_t\\
+&=\omega \Lambda\begin{pmatrix}
+\psi_y\\\psi_{\pi}
+\end{pmatrix}
+\rho_{\eta}\eta_t + \omega \mathbf{b} \eta_t\\
+\begin{pmatrix}
+\psi_y\\\psi_{\pi}
+\end{pmatrix}&=(I - \omega\rho_{\eta}\Lambda)^{-1} \omega \mathbf{b}.
+\end{aligned}
+$$
+
+このようにして, $\psi_y, \psi_{\pi}$ を求めることができれば^[
+  解の唯一性と必要十分条件は, $\phi_y, \phi_{\pi} > 0$ に対して,
+  $$
+  \kappa(\phi_{\pi}-1) + (1-\beta)\phi_y > 0.
+  $$
+  導出は, @bullard2002 を参照してください.
+], IRFを計算することができます.
+
+```{julia}
+#| label: model-nk-scratch
+#| output: false
+#| code-fold: show
+module My
+
+@kwdef struct NK{TF<:AbstractFloat}
+    β::TF = 0.99
+    σ::TF = 1.0
+    ϕ::TF = 1.0
+    ε::TF = 10.0
+    θ::TF = 0.75
+    φ::TF = (ε - 1) * θ / ((1 - θ) * (1 - β * θ))
+    κ::TF = (ε - 1) * (σ + ϕ) / φ
+    ϕ_π::TF = 1.5
+    ϕ_y::TF = 0.125
+    rⁿ::TF = -log(β)
+    ρ_η::TF = 0.5
+    σ_η::TF = 0.25
+end
+
+function get_irf(m::NK; T=12, σ_ε=0.25)
+    (; β, σ, κ, rⁿ, ϕ_π, ϕ_y, ρ_η) = m
+
+    # Sequence of Shocks
+    ηs = zeros(T + 1)
+    ηs[1] = σ_ε
+    for t in 1:T
+        ηs[t+1] = ρ_η * ηs[t]
+    end
+
+    # IRF
+    ω = 1 / (σ + ϕ_y + ϕ_π * κ)
+    Λ = [σ (1-β*ϕ_π)
+        σ*κ κ+β*(σ+ϕ_y)]
+    𝐛 = [1, κ]
+
+    ψ_y, ψ_π = ([1 0; 0 1] - ω * ρ_η * Λ) \ (-ω * 𝐛)
+    ỹs = ψ_y * ηs
+    πs = ψ_π * ηs
+    is = rⁿ .+ ϕ_π * πs .+ ϕ_y * ỹs .+ ηs
+
+    return ỹs, πs, is, ηs
+end
+
+end # module
+```
+
+```{julia}
+#| label: fig-nk-scratch
+#| fig-cap: "IRF of New Keynesian Model from Scratch"
+#| code-fold: true
+m = My.NK()
+T = 12
+ỹs, πs, is, ηs = My.get_irf(m, T=T)
+
+p1 = plot(0:T, ỹs, title=L"Output Gap $\widetilde{Y}_t$", label=false)
+p2 = plot(0:T, πs, title=L"Inflation $\pi_t$", label=false)
+p3 = plot(0:T, is, title=L"Nominal Interest Rate $i_t$", label=false)
+p4 = plot(0:T, ηs, title=L"Shock $\eta_t$", label=false)
+
+p = plot(p1, p2, p3, p4, layout=(2, 2), xticks=0:2:T)
+```
+
+解釈としては, 正の金利ショックが起きた時
+
+- 実質金利の増加により, 現在の消費が減少 (NKIS)
+- $Y_t = C_t$ かつ, $Y_t^n$ は影響を受けないため, Output Gap $\widetilde{Y}_t$ が減少
+- Output Gapの減少により, インフレ率 $\pi_t$ が減少 (NKPC)
+
+### IRF by MacroModelling.jl
+
+同じシミュレーションを, `MacroModelling.jl` パッケージを用いて行うこともできます. 線形化したモデルを用いてもいいですが, 非線形なモデルを直接定義することもできます.
+
+```{julia}
+#| label: model-nk-macromodelling
+#| code-fold: show
+#| output: false
+@model NK begin
+    C[0]^(-σ) = β * (1 + i[0]) / (1 + π[1]) * C[1]^(-σ)
+    N[0]^ϕ = C[0]^(-σ) * Wr[0]
+    (1 - MCr[0]) * ε = 1 - φ * π[0] * (1 + π[0]) +
+                       φ * β * (C[1] / C[0])^(-σ) * π[1] * (1 + π[1]) * Y[1] / Y[0]
+    i[0] = rⁿ + ϕ_π * π[0] + ϕ_y * ỹ[0] + η[0]
+    Y[0] = A * N[0]
+    Y[0] = C[0]
+    ỹ[0] = log(Y[0]) - log(Yⁿ)
+    MCr[0] = Wr[0] / A
+    η[0] = ρ_η * η[-1] + σ_ϵ * ϵ[x]
+end
+
+@parameters NK begin
+    σ = 1.0
+    ϕ = 1.0
+    ε = 10.0
+    θ = 0.75
+    φ = (ε - 1) * θ / ((1 - θ) * (1 - β * θ))
+    A = 1.0
+    β = 0.99
+    rⁿ = -log(β)
+    Yⁿ = μ^(-1 / (σ + ϕ)) * A^((1 + ϕ) / (σ + ϕ))
+    μ = ε / (ε - 1)
+    ϕ_π = 1.5
+    ϕ_y = 0.125
+    ρ_η = 0.5
+    σ_ϵ = 0.25
+end
+```
+
+```{julia}
+#| label: fig-nk-macromodelling
+#| fig-cap: "IRF of New Keynesian Model by MacroModelling.jl"
+#| code-fold: true
+T = 12
+irf = get_irf(NK, periods=T + 1, variables=[:i, :η, :π])
+ỹs = collect(get_irf(NK, periods=T + 1, variables=[:ỹ], levels=true)[1, :])
+
+p1 = plot(0:T, ỹs, title=L"Output Gap $\widetilde{Y}_t$", label=false)
+p2 = plot(0:T, irf[3, :], title=L"Inflation $\pi_t$", label=false)
+p3 = plot(0:T, irf[1, :], title=L"Nominal Interest Rate $i_t$", label=false)
+p4 = plot(0:T, irf[2, :], title=L"Shock $\eta_t$", label=false)
+
+plot(p1, p2, p3, p4, layout=(2, 2), xticks=0:2:T)
+```
+
+@fig-nk-scratch と全く同じ結果が得られます. 実は, `MacroModelling.jl` や `Dynare` といったパッケージは, 対数線形化とそのシミュレーションを自動で行うためのツールだったです.^[
+  対数線形化は一次近似に過ぎませんが, これらのパッケージではより高次の近似も可能です.
+]
+

@@ -1,0 +1,298 @@
+---
+engine: julia
+---
+
+# Remained Proofs
+
+## RBC Model
+
+## New Keynesian Model
+
+###  CES生産関数における価格指数
+
+::: {#prp-price-index}
+
+最終財の価格 $P_t$ は中間財の価格 $P_{j, t}$ を用いて以下のように表される:
+
+$$
+P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon}\right)^{\frac{1}{1-\varepsilon}}.
+$$
+
+また, 各中間財の需要 $Y_{j, t}$ は以下のように表される:
+
+$$
+Y_{j, t} = \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon} Y_t.
+$$
+
+:::
+
+::: {.proof}
+
+最終財の生産者が $Y_t$ 単位の最終財を生産する時の費用最小化問題を考える.
+
+$$
+\min_{\{Y_{j, t}\}_{j=0}^{1}} \int_{0}^{1} P_{j, t} Y_{j, t} dj \quad \text{s.t.} \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}} = Y_t.
+$$
+
+$$
+\mathcal{L} = \int_{0}^{1} P_{j, t} Y_{j, t} dj + \lambda_t \left(Y_t - \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}}\right)
+$$
+
+FOC:
+
+$$
+\begin{aligned}
+P_{j, t} &= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon-1}{\varepsilon}}\right)^{\frac{1}{\varepsilon - 1}}}_{= Y_{t}^{\frac{1}{\varepsilon}}} Y_{j, t}^{-\frac{1}{\varepsilon}} \\
+&= \lambda_t \left(\frac{Y_{j, t}}{Y_t}\right)^{-\frac{1}{\varepsilon}}.
+\end{aligned}
+$${#eq-foc-ces}
+
+両辺に $Y_{j, t}$ を掛けて, $j$ で積分すると
+
+
+$$
+\int_{j=0}^{1} P_{j, t} Y_{j, t} \,dj = \lambda_t Y_t^{\frac{1}{\varepsilon}} \underbrace{\int_{j=0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj}_{=Y_t^{\frac{\varepsilon-1}{\varepsilon}}} = \lambda_t Y_t
+$$
+
+ここで $\left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \,dj\right)^{\frac{1}{1-\varepsilon}} = \lambda_t Y_t$ という表現を見ると, 左辺は最終財を生産するための費用であることから, $\lambda_t$ は最終財の価格と解釈できることがわかります.
+
+ここで @eq-foc-ces の両辺を $1-\varepsilon$ 乗して, $j$ について積分し, $\frac{1}{1-\varepsilon}$ 乗すると
+
+$$
+\begin{aligned}
+\left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \,dj\right)^{\frac{1}{1-\varepsilon}} &=
+\lambda_t Y_t^{\frac{1}{\varepsilon}} \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{1}{1-\varepsilon}}}_{Y_t^{-\frac{1}{\varepsilon}}} \\
+&= \lambda_t.
+\end{aligned}
+$$
+
+また, @eq-foc-ces に $\lambda_t = P_t$ を代入すると以下を得る.
+
+$$
+Y_{j, t} = \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon} Y_t.
+$$
+
+:::
+
+### 対数線形化
+
+ここでは $\hat{x}_t := \log x_t - \log x$ とします. また, $\log (1 + x_t) \approx x_t$ という近似を用います.
+
+::: {#prp-lin-nkis}
+
+## New Keynesian IS Curveの対数線形化
+
+$$
+C_t^{-\sigma} = \beta \mathbb{E}_t\left[\frac{1+i_t}{1+\pi_{t+1}}C_{t+1}^{-\sigma}\right]
+\Rightarrow
+\hat{C}_t = \mathbb{E}_t[\hat{C}_{t+1}] - \frac{1}{\sigma}\left(i_t - \log \beta - \mathbb{E}_t[\pi_{t+1}]\right).
+$$
+
+:::
+
+::: {.proof}
+
+期待値記号を無視して両辺の対数を取ると,
+
+$$
+-\sigma \log C_t = \log \beta + \log(1+i_t) - \log(1+\pi_{t+1}) - \sigma \log C_{t+1}.
+$$
+
+$$
+\begin{aligned}
+LHS &\approx -\sigma \log C - \sigma \frac{1}{C} (C_t - C) 
+= -\sigma \log C - \sigma \hat{C}_t \\
+RHS &\approx \log \beta + i_t - \pi_{t+1} - \sigma \log C - \sigma \frac{1}{C}(C_{t+1} - C) \\
+&= \log \beta + i_t - \pi_{t+1} - \sigma \log C - \sigma \hat{C}_{t+1}.
+\end{aligned}
+$$
+
+$LHS = RHS$ であるので, 
+
+$$
+\hat{C}_t = \mathbb{E}_t[\hat{C}_{t+1}] - \frac{1}{\sigma}\left(i_t - \log \beta - \mathbb{E}_t[\hat{\pi}_{t+1}] \right).
+$$
+
+:::
+
+
+::: {#prp-lin-nkpc}
+
+## New Keynesian Phillips Curveの対数線形化
+$$
+(1-MC_{t}^r)\varepsilon = 1 - \varphi\pi_{t}(1+\pi_{t}) + \varphi \beta\mathbb{E}_t\left[
+  \left(\frac{C_{t+1}}{C_{t}}\right)^{-\sigma}\pi_{t+1}(1+\pi_{t+1})\frac{Y_{t+1}}{Y_t}
+\right]
+$$
+
+これを対数線形化すると,
+
+$$
+\pi_t= \beta \mathbb{E}[\hat{\pi}_{t+1}] + (1-\beta)\pi +
+\frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +
+\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right]
+$$
+
+:::
+
+::: {.proof}
+
+NK-ISでは丁寧に導出したので, やや省略します.
+
+$$
+LHS = (1-\exp(\log MC_{t}^r))\varepsilon \approx (1-MC^r)\varepsilon - \varepsilon MC^r \widehat{MC^r}_{t}.
+$$
+
+$RHS = 1 - RHS_1 + \varphi\beta\mathbb{E}[RHS_2]$ とします.
+
+$$
+\begin{aligned}
+RHS_1 &= \varphi(\exp(\log (1+\pi_t))-1)\exp(\log(1 + \pi_t)) \\
+&\approx \varphi\pi(1+\pi) + \varphi ((1+\pi)^2 + \pi(1+\pi))(\pi_t - \pi),\\
+RHS_2 &= \exp(-\sigma\Delta\hat{C}_{t+1})(\exp(\log (1+\pi_{t+1}))-1)\exp(\log (1+\pi_{t}))\exp(\Delta \hat{Y}_{t+1}) \\
+&\approx \pi(1+\pi) + \pi(1+\pi)\left(-\sigma\Delta\hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right) + ((1+\pi)^2 + (1+\pi)\pi)(\pi_{t+1}-\pi).
+\end{aligned}
+$$
+
+$LHS = RHS$ であり, 定常状態 $(1-MC^r)\varepsilon = 1 - (1-\beta)\varphi\pi(1+\pi)$ を用いると,
+
+$$
+\begin{aligned}
+\pi_{t} - \pi &= \beta \mathbb{E}[\hat{\pi}_{t+1} - \pi]
++\frac{\varepsilon MC^r}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t}
++\frac{\beta\pi}{\varphi(1 + 2\pi)}\mathbb{E}\left[-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right] \\
+\pi_t&= \beta \mathbb{E}[\hat{\pi}_{t+1}] + (1-\beta)\pi +
+\frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +
+\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right].
+\end{aligned}
+$$
+
+:::
+
+::: {#lem-output-gap}
+
+## 産出ギャップの対数線形化
+
+産出ギャップ $\widetilde{Y}_t := \log Y_t - \log Y_t^n$ は, 定常状態のゼロインフレ ($\pi = 0$) において, 以下のように線形化される.
+
+$$
+\widetilde{Y}_t = \hat{Y}_t - \hat{Y}_t^n.
+$$
+
+:::
+
+::: {.proof}
+
+ゼロインフレにおいては, 価格改訂のコストの有無は産出に影響を与えないため, sticky price の均衡と flexible price の均衡は等しくなる. したがって, $Y = Y^n$ であるため,
+
+$$
+\begin{aligned}
+\widetilde{Y}_t &:= \log Y_t - \log Y_t^n \\
+&= (\underbrace{\log Y_t - \log Y}_{=: \hat{Y}_t}) - (\underbrace{\log Y_t^n - \log Y^n}_{=: \hat{Y}_t^n}).
+\end{aligned}
+$$
+
+:::
+
+::: {#lem-lin-mc}
+
+## 実質限界費用ギャップと産出ギャップの関係
+
+実質限界費用ギャップ $\widehat{MC^r}_t$ と産出ギャップ $\widetilde{Y}_t$ の関係は以下のように表される.
+
+$$
+\widehat{MC^r}_t = (\sigma + \phi) \widetilde{Y}_t.
+$$
+
+:::
+
+::: {.proof}
+
+- $Y_t = A_t N_t$ より, $N_t = \frac{Y_t}{A_t}$
+- @eq-opt-household より, $\frac{W_t}{P_t} = C_t^{\sigma}N_t^{\phi}$
+- $MC^r_t = \frac{W_t}{A_t P_t}$
+
+よって, 以下の式を得ます.
+
+$$
+MC^r_t = A_t^{-(\phi+1)} Y_t^{\sigma + \phi}.
+$$
+
+対数線形化すると,
+
+$$
+\widehat{MC^r}_t = -(\phi+1) \hat{A}_t + (\sigma + \phi) \hat{Y}_t.
+$$
+
+@eq-output-flexible より,
+
+$$
+\hat{Y}_t^n = \frac{1+\phi}{\phi+\sigma}\hat{A}_t \Rightarrow
+(1+\phi)\hat{A}_t = (\phi + \sigma)\hat{Y}_t^n.
+$$
+
+よって, @lem-output-gap を用いて,
+ 
+$$
+\widehat{MC^r}_t = (\sigma + \phi)(\hat{Y}_t - \hat{Y}_t^n) = (\sigma + \phi) \widetilde{Y}_t.
+$$
+
+:::
+
+## DMP Framework
+
+### 均衡条件
+
+::: {#prp-dmp-eq}
+
+@eq-bellman-firm, @eq-free-entry, @eq-bellman-worker, @eq-foc-nb より, 次の式を得る.
+
+$$
+\frac{\kappa}{(1-\gamma)\lambda_{f}(\theta_t)} = \beta \mathbb{E}\left[z_{t+1} - b + \frac{1-\sigma-\gamma\lambda_w(\theta_{t+1})}{1-\gamma}\frac{\kappa}{\lambda_{f}(\theta_{t+1})}\right].
+$$
+
+:::
+
+::: {.proof}
+
+ここでは, $w(z)$ を $w$ と省略し, $\mathbb{E}[\cdot| z]$ を $\mathbb{E}[\cdot]$ と省略します.  @eq-bellman-firm に @eq-free-entry を代入すると,
+
+$$
+J(z) = z - w + \beta \mathbb{E}[(1-\sigma) J(z')],
+$${#eq-dmp-eq-1}
+$$
+\frac{\kappa}{\lambda_f(\theta)} = \beta \mathbb{E}[J(z')].
+$${#eq-dmp-eq-2}
+
+@eq-bellman-worker の差分を取り, $1-\gamma$ をかけると
+
+$$
+(1-\gamma)(W(z) - U(z)) = (1-\gamma)(w - b) + \beta \mathbb{E}[(1-\gamma)(1-\sigma-\lambda_w(\theta))(W(z') - U(z'))].
+$${#eq-dmp-eq-3}
+
+@eq-dmp-eq-3 に @eq-foc-nb と @eq-free-entry を代入して,
+
+$$
+\frac{\gamma}{1-\gamma} J(z) = w-b + \beta \mathbb{E}\left[\frac{\gamma}{1-\gamma}(1-\sigma-\lambda_{w}(\theta))J(z')\right].
+$${#eq-dmp-eq-4}
+
+@eq-dmp-eq-1 と @eq-dmp-eq-4 を足して, @eq-dmp-eq-2 を代入すると,
+
+$$
+\begin{aligned}
+\frac{1}{1-\gamma} J(z) &=
+z - b + \beta \mathbb{E}\left[\frac{1-\sigma-\gamma\lambda_w(\theta)}{1-\gamma}J(z')\right]\\
+&= z - b + \frac{1-\sigma-\gamma\lambda_w(\theta)}{1-\gamma}\frac{\kappa}{\lambda_f(\theta)}.
+\end{aligned}
+$${#eq-dmp-eq-5}
+
+@eq-dmp-eq-5 に $\beta$ をかけ, $t$ を $t+1$ に置き換えて期待値を取ると,
+
+$$
+\frac{1}{1-\gamma} \beta \mathbb{E}[J(z')] =
+\beta \mathbb{E}\left[z' - b + \frac{1-\sigma-\gamma\lambda_w(\theta')}{1-\gamma}\frac{\kappa}{\lambda_f(\theta')}\right].
+$${#eq-dmp-eq-6}
+
+@eq-dmp-eq-6 に @eq-dmp-eq-2 を代入すると, 命題の式を得る.
+
+:::

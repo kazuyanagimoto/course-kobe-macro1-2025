@@ -1,0 +1,39 @@
+project:
+  type: book
+
+book:
+  title: Macroeconomics I
+  author:
+    - name: 柳本和春
+      email: yanagimoto@econ.kobe-u.ac.jp
+      orcid: 0009-0007-1967-8304
+      affiliations:
+        - name: 神戸大学
+  date: last-modified
+  site-url: https://kazuyanagimoto.com/course-kobe-macro1-2025
+  repo-url: https://github.com/kazuyanagimoto/course-kobe-macro1-2025
+  
+
+bibliography: references.bib
+bibliography-style: chicago-author-year
+
+profile:
+  group:
+    - [html, pdf]
+
+execute:
+  freeze: auto
+
+crossref:
+  fig-title: "図"
+  tbl-title: "表"
+  eq-title: "式"
+  thm-title: "定理"
+  prp-title: "命題"
+  fig-prefix: "図"
+  tbl-prefix: "表"
+  eq-prefix: "式"
+  thm-prefix: "定理"
+  prp-prefix: "命題"
+  lem-title: "補題"
+  lem-prefix: "補題"

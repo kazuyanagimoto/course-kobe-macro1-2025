@@ -1,0 +1,61 @@
+::: {.content-visible when-format="html"}
+
+# Syllabus {.unnumbered}
+## Course Materials
+
+| Chapter | Lesson | Main References | Assignments |
+|:---|:--:|:---|:---|
+| RBC Model | [{{< fa book >}}](01-rbc.html) | @azzimonti2025, Chapter 14 | 2025-12-23 |
+| New Keynesian | [{{< fa book >}}](02-nk.html) | @ascari2012; @gali2015, Chapter 3 | 2026-01-20 |
+| DMP Framework | [{{< fa book >}}](03-dmp.html) | @azzimonti2025, Chapter 20 | 2026-01-28 |
+: {tbl-colwidths="[20, 10, 50, 20]"}
+
+
+## 成績について
+
+- 課題 (レポート) : 20%
+- 期末試験: 80%
+
+**課題の採点について**
+
+- 各課題の大問のうち, 課題提出後, ランダムに選ばれた大問のみ採点する
+- TAセッションで行われる課題の解説は, すべての大問について行われる
+- 期末試験においては解答したものがすべて採点される
+
+## 課題について
+
+**提出期限**
+
+- 対応するTAセッションの前日23:59 (JST)
+- 例: 12月24日のTAセッション → 12月23日23:59まで
+- 試験期間が近いため, 第3回の課題は1月28日提出締切とし, 1月29日の授業で解説を行う
+
+**提出方法**
+
+- Google Classroom 上でPDFレポートとqmdファイルをアップロード. データ等の提出の必要はない
+- 必要に応じて, レポートの内容が再現可能か質問することがある
+
+**レポートについて**
+
+- PDF形式で提出. [Quarto](https://quarto.org/) で作成されたもので, 手書きは不可
+    - レポートにコードは**含めない**こと
+    - 図と表以外のコード実行のアウトプットも含めてはいけない (論文形式)
+    - 再現性の観点から, 有料のフォント (特にMacのヒラギノ) は利用しないこと
+- コードはJuliaを用いること
+- 第1, 2回のTAセッションでJuliaとQuartoの基本的な使い方を解説する
+- 解答にはマクロIVでの[テンプレート](https://github.com/kazuyanagimoto/course-kobe-macro4-2025/blob/main/assignment/00-answer.qmd) を利用することを推奨する
+
+## 講義資料
+
+授業では基本的に板書を用いるが, 必要に応じて講義資料 (このウェブサイト) も利用する. 以下のPDF版も必要に応じて利用すると良いが, 頻繁に更新される可能性があることに注意すること.
+
+![](Macroeconomics-I.pdf){width=100% height=600px}
+
+:::
+
+::: {.content-hidden when-format="html"}
+
+本レクチャーノートの内容は, 第１章のRBCモデルは @azzimonti2025 のChapter 14, 第２章のニューケインジアンモデルは @ascari2012 および @gali2015 のChapter 3, 第３章のDMPフレームワークは @azzimonti2025 のChapter 20を主な参考文献として作成されている. 講義は [Website版](https://kazuyanagimoto.com/course-kobe-macro1-2025/) を用いて行われるが, このPDF版も必要に応じて利用すると良い. ただし, 頻繁に更新される可能性があるため最終更新日等を注意すること.
+
+
+:::

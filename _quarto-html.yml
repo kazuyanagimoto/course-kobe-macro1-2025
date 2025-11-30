@@ -1,0 +1,31 @@
+project:
+  output-dir: _book
+  pre-render:
+    - quarto render --profile pdf
+  resources:
+    - Macroeconomics-I.pdf
+
+book:
+  chapters: 
+    - index.qmd
+    - text: RBC Model
+      file: 01-rbc.qmd
+    - text: New Keynesian
+      file: 02-nk.qmd
+    - text: DMP Framework
+      file: 03-dmp.qmd
+  appendices: 
+    - 11-linearization.qmd
+    - 12-proofs.qmd
+    - 13-foundation.qmd
+    - references.qmd
+
+format:
+  html:
+    code-tools: true
+    theme:
+      - brand
+    highlight-style: atom-one
+
+execute: 
+  echo: true

@@ -51,7 +51,7 @@ calendar <- tar_plan(
       "Unemployment II",
       "Unemployment III",
       "Unemployment IV",
-      "Summary",
+      "Exam",
       "Summary"
     )
   ) |>

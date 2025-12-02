@@ -4,6 +4,7 @@ project:
     - quarto render --profile pdf
   resources:
     - Macroeconomics-I.pdf
+    - static/schedule.csv
 
 book:
   chapters: 

@@ -10,6 +10,18 @@
 | DMP Framework | [{{< fa book >}}](03-dmp.html) | @azzimonti2025, Chapter 20 | 2026-01-28 |
 : {tbl-colwidths="[20, 10, 50, 20]"}
 
+::: {.callout-tip}
+
+## Subscribe!
+
+授業スケジュールをGoogle Calendarなどに登録できます. 私個人のために作成したものであり間違いがある可能性があります. 大学からの正式なスケジュールを優先した上で, 参考程度にご利用ください.
+
+```{=html}
+<p><input class="form-control" type="text" value="https://kazuyanagimoto.com/calendar/macro1.ics" onclick="this.select()" readonly></p>
+```
+
+:::
+
 
 ## 成績について
 

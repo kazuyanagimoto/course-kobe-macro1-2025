@@ -23,6 +23,8 @@
     - Run `import Pkg; Pkg.activate("."); Pkg.instantiate()` in the Julia console
 1. Run `targets::tar_make()` to build the website
     - If you got an error about Julia, render qmd-files individually.
+1. To render PDF lecture notes, run `quarto render --profile pdf`
+
 
 ## Licenses
 

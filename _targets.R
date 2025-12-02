@@ -38,7 +38,7 @@ tar_plan(
   tar_quarto(
     website,
     path = ".",
-    profile = "html",
+    profile = c("html", "pdf"),
     quiet = FALSE,
     extra_files = c(
       list_files(here_rel("static"), recursive = TRUE),

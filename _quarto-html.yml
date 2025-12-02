@@ -1,7 +1,5 @@
 project:
   output-dir: _book
-  pre-render:
-    - quarto render --profile pdf
   resources:
     - Macroeconomics-I.pdf
     - static/schedule.csv

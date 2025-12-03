@@ -1,4 +1,4 @@
-# Macroeconomics I (Q4 2025)
+# Macroeconomics I (Q4 2025) <a href='https://kazuyanagimoto.com/course-kobe-macro1-2025/'><img src='static/img/logo_circle.svg' align="right" height="150" /></a>
 
 [Macro I • Q4 2025, Kobe University](https://kazuyanagimoto.com/course-kobe-macro1-2025/)<br>
 [Kazuharu Yanagimoto](https://kazuyanagimoto.com)

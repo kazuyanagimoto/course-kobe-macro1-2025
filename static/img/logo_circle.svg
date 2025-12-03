@@ -1,0 +1,47 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="190" fill="#FFFFFF" stroke="#E6E6E6" stroke-width="2"/>
+  
+  <!-- Business Cycle Wave - Red section (expansion to peak) -->
+  <path d="M 50 200 Q 75 140, 100 120" 
+        fill="none" 
+        stroke="#CB3C33" 
+        stroke-width="12" 
+        stroke-linecap="round"/>
+  
+  <!-- Business Cycle Wave - Purple section (peak to trough) -->
+  <path d="M 100 120 Q 125 100, 150 120 Q 175 140, 200 200 Q 225 260, 250 280 Q 275 300, 300 280" 
+        fill="none" 
+        stroke="#9558B2" 
+        stroke-width="12" 
+        stroke-linecap="round"/>
+  
+  <!-- Business Cycle Wave - Green section (trough to expansion) -->
+  <path d="M 300 280 Q 325 260, 350 200" 
+        fill="none" 
+        stroke="#389826" 
+        stroke-width="12" 
+        stroke-linecap="round"/>
+  
+  <!-- Trend line -->
+  <line x1="50" y1="210" x2="350" y2="190" 
+        stroke="#4D4D4D" 
+        stroke-width="3" 
+        stroke-dasharray="8,6"
+        opacity="0.5"/>
+  
+  <!-- Julia color dots at peaks and troughs -->
+  <circle cx="100" cy="120" r="16" fill="#CB3C33"/>
+  <circle cx="300" cy="280" r="16" fill="#389826"/>
+</svg>

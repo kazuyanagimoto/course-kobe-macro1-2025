@@ -30,8 +30,8 @@ default(size=(600, 370), titlefontsize=10, fmt=:svg, palette=mypalette[[6, 2, 4,
 
 Real Business Cycle (RBC) モデルとは, 経済のビジネスサイクルを説明するためのマクロ経済学のモデルです. RBCモデルは, 経済の変動が主に技術的な要因や生産性の変化によって引き起こされると仮定しています.
 
--   **Real**: 貨幣や他の名目変数を考慮しない
--   **Business Cycle**: 長期的なトレンド (成長) と短期的な変動を考慮する
+- **Real**: 貨幣や他の名目変数を考慮しない
+- **Business Cycle**: 長期的なトレンド (成長) と短期的な変動を考慮する
 
 これまで学んだRamseyモデルでも, 貨幣や名目変数を考慮しない, つまりRealなモデルでした. また, Ramseyモデルでも, 生産性 (TFP) の成長を考慮していました. RBCモデルでは, TFPの成長を確率的なもの (stochastic) なものとして考えます. まとめると以下のようになります.
 
@@ -69,12 +69,35 @@ Hodrick-Prescott (HP) フィルターは, 時系列データからトレンド�
 $$
 \min_{\{\tau_t\}} \sum_{t=1}^{T} \left(Y_t - \tau_t\right)^2 +
 \lambda \left[\sum_{t=2}^{T-1} \left((\tau_{t+1} - \tau_t) - (\tau_t - \tau_{t-1})\right)^2\right]
-$$
+$${#eq-hp-filter}
 
 ここで平滑化パラメータ $\lambda$ は四半期データなら $1600$, 年次データなら $100$ が一般的に用いられる.
 :::
 
-直感的には, ある程度スムーズなトレンド成分を求めるために, トレンド成分の変化の仕方が極端になりすぎないようにペナルティをかけているというイメージです. @fig-hp-filter は, アメリカの実質GDPの時系列データにHPフィルターを適用した結果です. Juliaでは, `QuantEcon.hp_filter` 関数を用いてHPフィルターを適用できます.
+直感的にはある程度スムーズなトレンド成分を求めるために, トレンド成分の符号の反転に大きくペナルティを欠けているというイメージです. @fig-hp-penalized を見ると, 符号が反転するような $\tau_t$ の取り方はペナルティが大きくなり, そのような $\tau_t$ が選ばれにくいことがわかります.
+
+![Example of Large Penalty in HP Filter](/static/cetz/hp_penalized.svg){width="80%" fig-align="center" #fig-hp-penalized}
+
+一方で, @fig-hp-smooth は, 符号が反転しにくい $\tau_t$ の取り方はペナルティが小さくなり, そのような $\tau_t$ が選ばれやすいことを示しています. 今回の例では, $y_t$ が上昇傾向にあるように見えるので, 一定のペースで上昇するような $\tau_t$ が選ばれやすくなっています.
+
+![Example of Small Penalty in HP Filter](/static/cetz/hp_smooth.svg){width="80%" fig-align="center" #fig-hp-smooth}
+
+この異符号に対する大きなペナルティは, @eq-hp-filter のペナルティ項を展開して見ると違いがよく分かります.
+
+$$
+\begin{aligned}
+&\sum_{t=2}^{T-1} \left((\tau_{t+1} - \tau_t) - (\tau_t - \tau_{t-1})\right)^2 \\
+&= \sum_{t=2}^{T-1} (\tau_{t+1} - \tau_t)^2 + \sum_{t=2}^{T-1} (\tau_t - \tau_{t-1})^2 - 2\sum_{t=2}^{T-1} (\tau_{t+1} - \tau_t)(\tau_t - \tau_{t-1}) \\
+&= \underbrace{(\tau_{T} - \tau_{T-1})^2 + 2\sum_{t=2}^{T-1} (\tau_t - \tau_{t-1})^2}_{\text{Penalty for large difference}} \underbrace{- 2\sum_{t=2}^{T-1} (\tau_{t+1} - \tau_t)(\tau_t - \tau_{t-1})}_{\text{Penalty for sign change}}.
+\end{aligned}
+$$
+
+最初の項は, トレンド成分の変化が大きい場合にペナルティを課すものであり, 2番目の項はトレンド成分の符号が反転する場合にペナルティを課すものです. そのため, 符号が反転しにくいようなトレンド成分が選ばれやすくなります.
+
+
+**HP Filter の実践**
+
+@fig-hp-filter は, アメリカの実質GDPの時系列データにHPフィルターを適用した結果です. Juliaでは, `QuantEcon.hp_filter` 関数を用いてHPフィルターを適用できます.
 
 ```{julia}
 #| label: fig-hp-filter
@@ -131,6 +154,8 @@ p4 = plot_cycle("investment", "Investment")
 
 plot(p1, p2, p3, p4, layout=(2, 2))
 ```
+
+@fig-hp-cycle は, Real GDP のサイクル成分と他の経済変数のサイクル成分を比較したものです. これを見ると消費と労働時間のサイクル成分はGDPのサイクル成分と似た動きをしていることがわかります. 一方で, 投資のサイクル成分はGDPのサイクル成分よりも変動が大きいことがわかります. 
 
 なお, HPフィルターは慣例的に用いられている手法ですが
 
@@ -210,7 +235,7 @@ $${#eq-capital-accumulation}
 **予算制約**
 
 $$
-c_t + i_t = zF(k_t, n_t).
+c_t + i_t = z_t F(k_t, n_t).
 $$
 
 ### ベルマン方程式

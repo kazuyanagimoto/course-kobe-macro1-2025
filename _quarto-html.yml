@@ -21,10 +21,8 @@ book:
 
 format:
   html:
+    lightbox: true
     code-tools: true
     theme:
       - brand
     highlight-style: atom-one
-
-execute: 
-  echo: true

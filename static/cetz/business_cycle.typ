@@ -8,6 +8,9 @@
 #let f_cycle(x) = calc.sin(1.5 * calc.pi * x) / 2
 #let f(x) = f_trend(x) + f_cycle(x)
 
+#let color_base = rgb("#107895")
+#let color_accent = rgb( "#9a2515")
+
 #let x0 = calc.pi / 6
 #let x1 = calc.pi / 3
 
@@ -25,7 +28,7 @@
       content((x0 + 0.15, f(1.7) + 0.2), text(size: 0.9em)[Recession])
       rect((x0 - 0.1, 0), (x1 - 0.1, f(1.7)), stroke: none, fill: rgb(21, 25, 29, 50))
     })
-    plot.add(f, domain: (0., 1.6))
+    plot.add(f, domain: (0., 1.6), style: (stroke: color_base))
     plot.add(f_trend, domain: (0., 1.6), style: (stroke: (dash: "dashed")))
   })
 })

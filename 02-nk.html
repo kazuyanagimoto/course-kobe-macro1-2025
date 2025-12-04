@@ -103,6 +103,9 @@ div.csl-indent {
 <link href="site_libs/bootstrap/bootstrap-5784758c84cce76f24ed229b30355aa1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-dark-78dfa9b2c3ae426e3f3c232c09a2db7b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-5784758c84cce76f24ed229b30355aa1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -174,7 +177,7 @@ window.Quarto = {
 <meta name="twitter:title" content="2&nbsp; New Keynesian Model – Macroeconomics I">
 <meta name="twitter:description" content="">
 <meta name="twitter:image" content="https://kazuyanagimoto.com/course-kobe-macro1-2025/static/img/sns-card.drawio.png">
-<meta name="twitter:creator" content="@kazuyanagimoto">
+<meta name="twitter:creator" content="kazuyanagimoto">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image-height" content="640">
 <meta name="twitter:image-width" content="1280">
@@ -406,7 +409,7 @@ c_t + a_{t} = w_t n_t + \underbrace{\frac{1 + i_t}{1 + \pi_t}}_{= 1 + r_t} a_{t-
 <div id="fig-goldberg2007" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-goldberg2007-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./static/img/02-nk/goldberg2007_chart2.svg" class="img-fluid figure-img" style="width:80.0%">
+<a href="./static/img/02-nk/goldberg2007_chart2.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="図&nbsp;2.1: Chart 2 from @goldberg2007"><img src="./static/img/02-nk/goldberg2007_chart2.svg" class="img-fluid figure-img" style="width:80.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-goldberg2007-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 図&nbsp;2.1: Chart 2 from <span class="citation" data-cites="goldberg2007">Goldberg and Hellerstein (<a href="references.html#ref-goldberg2007" role="doc-biblioref">2007</a>)</span>
@@ -701,7 +704,7 @@ i_t = r^n + \phi_{\pi}(\pi_t - \pi^*) + \phi_y \widetilde{Y}_t
 <div id="fig-taylor-rule" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-taylor-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./static/img/02-nk/atlanta-fed_taylor-rule.svg" class="img-fluid figure-img" style="width:90.0%">
+<a href="./static/img/02-nk/atlanta-fed_taylor-rule.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="図&nbsp;2.2: Taylor Rules from Fedral Reserve Bank of Atlanta."><img src="./static/img/02-nk/atlanta-fed_taylor-rule.svg" class="img-fluid figure-img" style="width:90.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-taylor-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 図&nbsp;2.2: Taylor Rules from Fedral Reserve Bank of Atlanta.
@@ -2469,6 +2472,38 @@ Taylor, John B. 1993. <span>“Discretion Versus Policy Rules in Practice.”</s
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 

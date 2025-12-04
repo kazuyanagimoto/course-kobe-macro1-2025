@@ -103,6 +103,9 @@ div.csl-indent {
 <link href="site_libs/bootstrap/bootstrap-5784758c84cce76f24ed229b30355aa1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-dark-78dfa9b2c3ae426e3f3c232c09a2db7b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-5784758c84cce76f24ed229b30355aa1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -174,7 +177,7 @@ window.Quarto = {
 <meta name="twitter:title" content="Appendix C — Foundations – Macroeconomics I">
 <meta name="twitter:description" content="">
 <meta name="twitter:image" content="https://kazuyanagimoto.com/course-kobe-macro1-2025/static/img/sns-card.drawio.png">
-<meta name="twitter:creator" content="@kazuyanagimoto">
+<meta name="twitter:creator" content="kazuyanagimoto">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image-height" content="640">
 <meta name="twitter:image-width" content="1280">
@@ -606,7 +609,7 @@ w^{1-\gamma_c} (1-l)^{-\gamma_c} - \alpha_l l^{-\gamma_l} = 0.
 <div id="fig-newton-method" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-newton-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./static/cetz/newton_method.svg" class="img-fluid figure-img" style="width:80.0%">
+<a href="./static/cetz/newton_method.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="図&nbsp;C.3: Visualization of Newton Method"><img src="./static/cetz/newton_method.svg" class="img-fluid figure-img" style="width:80.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-newton-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 図&nbsp;C.3: Visualization of Newton Method
@@ -682,7 +685,7 @@ x = \frac{a + b \exp y}{1 + \exp y}
 <div id="fig-bisection-method" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bisection-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./static/cetz/bisection_method.svg" class="img-fluid figure-img" style="width:80.0%">
+<a href="./static/cetz/bisection_method.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="図&nbsp;C.4: Visualization of Bisection Method"><img src="./static/cetz/bisection_method.svg" class="img-fluid figure-img" style="width:80.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bisection-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 図&nbsp;C.4: Visualization of Bisection Method
@@ -1762,6 +1765,38 @@ Erosa, Andrés, Luisa Fuster, and Gueorgui Kambourov. 2016. <span>“Towards a <
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 

@@ -413,7 +413,9 @@ $$
 -   最も単純な形の労働分配率として $1 - \alpha = \frac{2}{3}$
 -   GDPに締める消費の割合 (BGP上では定数) として, $\frac{c_t}{y_t} = \frac{3}{4}$
     -   @cooley1995 の値に近い
-    -   @fig-ratio-cons-gdp と比べるとやや小さい値である
+    -   @fig-ratio-cons-gdp と比べるとやや小さい値である.^[
+        ここでは簡易的にGDPに対する個人消費の割合を示していますが, 政府支出も民間に還元されていると考えられるため, 政府消費も含める必要があります. また, @cooley1995 では民間の耐久財消費を投資として扱うなど, モデル上の定義に合わせるために, 細かい調整が行われています.
+        ]
 
 これらを計算すると, $\phi = \frac{16}{25} = 0.64$ が得られ, おおむね @prescott1986 や @cooley1995 の値と一致します. ここでは, @azzimonti2025 の推定結果である $\phi = 0.6325$ を用います.
 
@@ -565,7 +567,8 @@ plot(ps..., layout=(2, 2))
 #| tbl-cap: Business Cycle Statistics from RBC Model
 #| output: asis
 function sim_one(; burnin, periods, mdl=RBC, parameters=(:ρ_z => 0.95))
-    sim = get_simulation(mdl, periods=periods + burnin, levels=true)
+    sim = get_simulation(mdl, periods=periods + burnin, levels=true,
+        parameters=parameters)
     cs = sim[1, burnin+1:end]
     is = sim[2, burnin+1:end]
     ns = sim[4, burnin+1:end]
@@ -623,5 +626,6 @@ pretty_table(
 RBCモデルはとてもシンプルなモデルですが, 実際のデータの景気循環をよく再現することが分かります. そのため, RBCモデルを土台として, モデルを拡張することで, より現実的なモデルを構築することができます. 代表的な研究としては, 以下のように発展していきます.
 
 -   個人の異質性: @aiyagari1994
--   金融の役割: **New Keynesian** モデル
+-   金融の役割: [New Keynesian](/02-nk.qmd) モデル
 -   失業の役割: @merz1995; @andolfatto1996
+

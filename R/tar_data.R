@@ -1,8 +1,24 @@
 data <- tar_plan(
   tar_map(
     values = tibble(
-      name = c("rgdp", "consumption", "labor", "investment", "population"),
-      id = c("GDPC1", "PCECC96", "HOANBS", "GPDIC1", "CNP16OV")
+      name = c(
+        "rgdp",
+        "consumption",
+        "labor",
+        "investment",
+        "government",
+        "cons_gov",
+        "population"
+      ),
+      id = c(
+        "GDPC1",
+        "PCECC96",
+        "HOANBS",
+        "GPDIC1",
+        "GCEC1",
+        "A955RC1Q027SBEA",
+        "CNP16OV"
+      )
     ),
     names = name,
     tar_target(
@@ -33,12 +49,22 @@ data <- tar_plan(
       by = "date"
     ) |>
     left_join(
+      fred_government |>
+        select(date, government = value),
+      by = "date"
+    ) |>
+    left_join(
+      fred_cons_gov |>
+        select(date, cons_gov = value),
+      by = "date"
+    ) |>
+    left_join(
       fred_population |>
         select(date, population = value),
       by = "date"
     ) |>
     mutate(across(
-      c(gdp, consumption, labor, investment),
+      c(gdp, consumption, labor, investment, government, cons_gov),
       ~ .x / population
     )) |>
     filter(!is.na(population)),

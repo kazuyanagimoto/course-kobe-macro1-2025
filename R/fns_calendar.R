@@ -41,7 +41,6 @@ calendar <- tar_plan(
       "RBC Model II",
       "RBC Model III",
       "RBC Model IV",
-      "RBC Model V",
       "New Keynesian I",
       "New Keynesian II",
       "New Keynesian III",
@@ -51,6 +50,7 @@ calendar <- tar_plan(
       "Unemployment II",
       "Unemployment III",
       "Unemployment IV",
+      "Unemployment V",
       "Exam",
       "Summary"
     )

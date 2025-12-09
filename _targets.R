@@ -28,7 +28,7 @@ write_lines <- function(text, file, ...) {
 tar_source()
 
 # Main Pipeline ----------------------------------------------------------------
-
+system2("quarto", args = c("render", "--profile", "pdf"))
 tar_plan(
   # Lesson -----------------------
   image,

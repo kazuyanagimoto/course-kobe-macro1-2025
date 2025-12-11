@@ -1,0 +1,15 @@
+# Labor Supply
+
+## Static Model
+
+まずは静学的な労働供給モデルを考えます. 家計は以下の効用最大化問題を解きます:
+
+$$
+\max_{c, h} u(c, h) \quad \text{ s.t. } c = w h + I.
+$$
+
+ここで, 消費 $c \geq 0$, 労働供給 $h \geq 0$, 賃金率 $w > 0$, 非労働所得 $I \geq 0$ です.
+
+
+
+## Dynamic Model

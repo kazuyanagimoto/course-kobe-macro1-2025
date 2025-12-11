@@ -450,7 +450,7 @@ $$
 k_{t+1} &= (1-\delta)k_t + z_t k_t^{\alpha} n_t^{1-\alpha} - c_t \\
 \log z_{t+1} &= \rho_z \log z_t + \sigma_z \varepsilon_{t}
 \end{aligned}
-$$
+$${#eq-rbc-model}
 
 `MacroModelling.jl` では上記のモデルを以下のように, ほとんどそのまま記述できます. 一つ注意点としては, $t$ 時点ですでに決定されている変数 ($k_t, z_t$) は $t-1$ 時点の変数として記述する必要があるということです. また, 後にIRFをプロットするために, investment $i_t$ と output $y_t$ は明示的にモデルの中で定義する必要があります.
 
@@ -474,6 +474,38 @@ end
     σ_z = 0.007
 end
 ```
+
+ここで行われているのは以下の3つのステップです.
+
+1. Variable の認識
+1. Non-stochastic steady state の計算
+1. 線形化 (一次近似)
+
+モデル上のパラメータ数が6 (`y`, `c`, `k`, `n`, `z`, `i`) であること, 状態変数が2つ (`k`, `z`) であること, ジャンプ変数が2つであること (`c`, `n`) であること, ショックが1つであること (`ε`) が正しく認識されています. 線形化および一次近似はここでは立ち寄らず, @sec-nk で詳しく説明します. 
+
+**Non-stochastic Steady State**
+
+Non-stochastic steady state はその名の通り, ショックが存在しない場合の定常状態を指します. 具体的には @eq-rbc-model の式を用いて, 以下の連立方程式を解きます.
+
+$$
+\begin{aligned}
+\phi\frac{1}{1-n} &= (1-\phi)\frac{(1-\alpha)k^{\alpha} n^{-\alpha}}{c} \\
+\frac{1-\phi}{c} &= \beta \left[\frac{(1-\phi)( \alpha k^{\alpha-1}n^{1-\alpha} + 1-\delta)}{c}\right] \\
+k &= (1-\delta)k + z k^{\alpha} n^{1-\alpha} - c \\
+\log z &= \rho_z \log z + \sigma_z \cdot 0
+\end{aligned}
+$${#eq-steady-state-rbc}
+
+今回のような単純なモデルでは, 解析解を求めることが可能ですが, 一般的には解析解がないため, 数値的に解く必要があります. `MacroModelling.jl` では, `get_steady_state` 関数を用いて簡単に計算できます.
+
+```{julia}
+#| label: steady-state-rbc
+get_steady_state(RBC)
+```
+
+ここでは, steady state の値の他に, 各パラメータに対する偏微分も計算されています. 例えば, 余暇のウェイトである $\phi$ の増加に対して, 消費 $c$ や労働 $n$ が減少することがわかります.
+
+**Simulation**
 
 このモデルは以下のように簡単にシミュレーションできます.
 
@@ -515,9 +547,7 @@ plot_irf(RBC, periods=150);
 -   $i_t$: TFPショックにより, 資本の限界生産性が上昇し, 即座に投資が増加する. その後, 生産性の減少に伴い投資も減少していく
 -   $k_t$: 資本はストック変数であるため, フローである投資 $i_t$ の変化に応じて徐々に変化する
 
-$\rho_z$ の役割
-
-RBCモデルでは, TFPショックの自己回帰係数 $\rho_z$ が重要な役割を果たします. $\rho_z$ が大きいほど, ショックの影響が長く続くことを意味します.
+**$\rho_z$ の役割**
 
 ```{julia}
 #| label: fig-irf-rhos
@@ -545,6 +575,8 @@ end
 
 plot(ps..., layout=(2, 2))
 ```
+
+RBCモデルでは, TFPショックの自己回帰係数 $\rho_z$ が重要な役割を果たします. $\rho_z$ が大きいほど, ショックの影響が長く続くことを意味します. $y_t$ は $z_t$ に強く依存するため, $\rho_z$ が大きいほど $y_t$ の増加も長く続きます. また, 消費をスムーズにする働きから, $c_t$ の変化は $y_t$ より緩やかになります. 生産性の変化が長く続かないと予期している家計は, 初期の高い生産性を活かすために労働供給を増加させます. そのため, $\rho_z$ が小さいほど $n_t$ の初期反応が大きくなります.
 
 ### 景気循環統計
 

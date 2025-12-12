@@ -2,14 +2,117 @@
 
 ## Static Model
 
+### Substitution and Income Effects
+
 まずは静学的な労働供給モデルを考えます. 家計は以下の効用最大化問題を解きます:
 
 $$
-\max_{c, h} u(c, h) \quad \text{ s.t. } c = w h + I.
+\max_{c, h} u(c, h) \quad \text{ s.t. } c \leq w h + I.
 $$
 
-ここで, 消費 $c \geq 0$, 労働供給 $h \geq 0$, 賃金率 $w > 0$, 非労働所得 $I \geq 0$ です.
+ここで, 消費 $c \geq 0$, 労働供給 $h \geq 0$, 賃金率 $w > 0$, 非労働所得 $I \geq 0$ です. また, 賃金率 $w$ と非労働所得 $I$ に対する労働供給を $h(w, I)$ とします. この時, 労働供給の弾力性は以下で定義されます:
 
+$$
+\begin{aligned}
+\eta_{h, w}^M &= \frac{\partial h(w, I)}{\partial w} \frac{w}{h(w, I)} \\
+\eta_{h, I} &= \frac{\partial h(w, I)}{\partial I} \frac{I}{h(w, I)}
+\end{aligned}
+$$
 
+特に, 所得を一定とした時の賃金弾力性 $\eta_{h, w}^M$ をマーシャリアン弾力性 (Marshallian elasticity) と呼びます. 次に, 労働供給の代替効果と所得効果を分離するために, ヒックス弾力性 (Hicksian elasticity) を導入します. 家計は以下の支出最小化問題を解きます:
+
+$$
+\min_{c, h} c \quad \text{ s.t. } u(c, h) \geq \bar{u}.
+$$
+
+ここで, 効用水準 $\bar{u}$ に対する労働供給を $h^H(w, \bar{u})$ とします. この時, ヒックス弾力性は以下で定義されます:
+
+$$
+\eta_{h, w}^H = \frac{\partial h^H(w, \bar{u})}{\partial w} \frac{w}{h^H(w, \bar{u})}.
+$$
+
+::: {.callout-note}
+
+## スルツキーの恒等式 (Slutsky Equation)
+
+所得 $I$, 価格ベクトル $\mathbf{p}$ のもとで次の家計の効用最大化問題を考える.
+
+$$
+\max_{\mathbf{x}} u(\mathbf{x}) \quad \text{ s.t. } \mathbf{p}^{\top} \mathbf{x} \leq I.
+$$
+
+この時, 財 $i$ の最適消費を $x_i(\mathbf{p}, I)$ とする. また, 効用水準 $\bar{u}$ に対する支出最小化問題を考える.
+
+$$
+\min_{\mathbf{x}} \mathbf{p}^{\top} \mathbf{x} \quad \text{ s.t. } u(\mathbf{x}) \geq \bar{u}.
+$$
+
+この時, 財 $i$ の最適消費を $x_i^H(\mathbf{p}, \bar{u})$ とし, 支出関数を $I(\mathbf{p}, \bar{u})$ とする.  連鎖律から次の式を得る.
+
+$$
+\frac{\partial x_i^H(\mathbf{p}, \bar{u})}{\partial p_i} = \frac{\partial x_i(\mathbf{p}, I(\mathbf{p}, \bar{u}))}{\partial p_i} + \frac{\partial x_i(\mathbf{p}, I(\mathbf{p}, \bar{u}))}{\partial I(\mathbf{p}, \bar{u})} \frac{\partial I(\mathbf{p}, \bar{u})}{\partial p_i}
+$$
+
+また, シェファードの補題 (Shephard's lemma) $\frac{\partial I(\mathbf{p}, \bar{u})}{\partial p_i} = x_i^H(\mathbf{p}, \bar{u})$ より,
+
+$$
+\frac{\partial x_i}{\partial p_i} = \frac{\partial x_i^H(\mathbf{p}, \bar{u})}{\partial p_i} - \frac{\partial x_i(\mathbf{p}, I)}{\partial I} x_i^H(\mathbf{p}, \bar{u}).
+$$
+
+これをスルツキーの恒等式 (Slutsky equation) と呼ぶ.
+
+:::
+
+労働供給の問題は価格1の財と価格 $-w$ の労働の2財問題とみなせるため,
+
+$$
+\frac{\partial h(w, I)}{\partial w} = \frac{\partial h^H(w, \bar{u})}{\partial w} + \frac{\partial h(w, I)}{\partial I} h^H(w, \bar{u}).
+$$
+
+ここで, 価格が負であるためシェファードの補題が $\frac{\partial I(w, \bar{u})}{\partial w} = -h^H(w, \bar{u})$ となることに注意してください. 全体を $\frac{w}{h}$ で掛けると^[
+    均衡において $h(w, I) = h^H(w, \overline{u})$ であるため, 右辺の $h(w, I)$ を $h^H(w, \overline{u})$ に置き換えても問題ありません.
+],
+
+$$
+\underbrace{\frac{\partial h(w, I)}{\partial w} \frac{w}{h}}_{\eta_{h, w}^M} = \underbrace{\frac{\partial h^H(w, \bar{u})}{\partial w} \frac{w}{h}}_{\eta_{h, w}^H} + \underbrace{\frac{\partial h(w, I)}{\partial I} \frac{I}{h}}_{\eta_{h, I}} \frac{wh}{I}.
+$$
+
+この式は, 労働供給の弾力性が次の代替効果と所得効果の和に分解されることを示しています.
+
+- **代替効果**: 賃金の増加によって労働のリターンが増加し, 労働供給を増やす効果. 余暇の価格 (労働の機会費用) の増加に対する財への代替と考えてもよい
+- **所得効果**: 所得の増加によって働く必要がなくなり, 労働供給を減らす効果. 余暇が正常財である場合, 所得の増加によって余暇の消費が増加し, 労働供給が減少すると考えてもよい
+
+### Examples
+
+::: {#exm-labor-loglog}
+
+$$
+\max_{c, l}  (1-\phi) \log c + \phi \log l \quad \text{ s.t. } c \leq w(1-l)
+$$
+$$
+\eta_{h, w}^M = \eta_{h, I} = -\frac{\phi}{w}\frac{I}{h}.
+$$
+
+:::
+
+::: {.proof}
+
+最適条件より,
+
+$$
+h(w, I) = 1 - \phi\left(1 + \frac{I}{w}\right).
+$$
+
+よって,
+
+$$
+\begin{aligned}
+\eta_{h, w}^M &= \frac{\partial h(w, I)}{\partial w} \frac{w}{h(w, I)} = \frac{\phi I}{w^2} \frac{w}{h(w, I)} = \frac{\phi}{w}\frac{I}{h(w, I)}\\
+\eta_{h, I} &= \frac{\partial h(w, I)}{\partial I} \frac{I}{h(w, I)} = -\frac{\phi}{w} \frac{I}{h(w, I)}.
+\end{aligned}
+$$
+
+:::
+ 
 
 ## Dynamic Model

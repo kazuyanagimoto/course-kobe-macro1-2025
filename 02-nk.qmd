@@ -2,7 +2,7 @@
 engine: julia
 ---
 
-# New Keynesian Model
+# New Keynesian Model {#sec-nk}
 
 ```{julia}
 #| label: setup-nk

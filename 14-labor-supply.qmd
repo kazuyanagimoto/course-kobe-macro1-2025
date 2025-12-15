@@ -22,7 +22,7 @@ $$
 特に, 所得を一定とした時の賃金弾力性 $\eta_{h, w}^M$ をマーシャリアン弾力性 (Marshallian elasticity) と呼びます. 次に, 労働供給の代替効果と所得効果を分離するために, ヒックス弾力性 (Hicksian elasticity) を導入します. 家計は以下の支出最小化問題を解きます:
 
 $$
-\min_{c, h} c \quad \text{ s.t. } u(c, h) \geq \bar{u}.
+\min_{c, h} c - wh \quad \text{ s.t. } u(c, h) \geq \bar{u}.
 $$
 
 ここで, 効用水準 $\bar{u}$ に対する労働供給を $h^H(w, \bar{u})$ とします. この時, ヒックス弾力性は以下で定義されます:
@@ -86,12 +86,19 @@ $$
 
 ::: {#exm-labor-loglog}
 
+## Cobb-Douglas Utility
+
 $$
-\max_{c, l}  (1-\phi) \log c + \phi \log l \quad \text{ s.t. } c \leq w(1-l)
+\max_{c, l}  (1-\phi) \log c + \phi \log l \quad \text{ s.t. } c \leq w(1-l) + I.
 $$
 $$
-\eta_{h, w}^M = \eta_{h, I} = -\frac{\phi}{w}\frac{I}{h}.
+\eta_{h, w}^M = \frac{\phi}{w}\frac{I}{h},
 $$
+
+- 代替効果: $\eta_{h, w}^H = \frac{\phi}{w}\frac{I}{h} + \phi$
+- 所得効果: $\eta_{h, I}\frac{wh}{I}=-\phi$
+
+$I = 0$ の時, 代替効果 $\phi$ と所得効果 $\phi$ が打ち消しあい, 労働供給の賃金弾力性は0となる.
 
 :::
 
@@ -112,7 +119,66 @@ $$
 \end{aligned}
 $$
 
+スルツキーの恒等式より,
+
+$$
+\eta_{h, w}^H = \eta_{h, w}^M - \eta_{h, I} \frac{wh(w, I)}{I} = \frac{\phi}{w}\frac{I}{h(w, I)} + \phi.
+$$
+
+**費用最小化問題**
+
+スルツキーの恒等式を確認するために, ヒックス弾力性を定義から計算する.
+
+$$
+\min_{c, l} c - w(1-l) \quad \text{ s.t. } (1-\phi) \log c + \phi \log l \geq \bar{u}.
+$$
+
+ラグランジアン $\mathcal{L} = c - w(1-l) + \lambda \left(\bar{u} - (1-\phi) \log c - \phi \log l \right)$ の最適条件は次の通り.
+
+$$
+\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial c} &= 1 - \lambda \frac{1-\phi}{c} = 0, \\
+\frac{\partial \mathcal{L}}{\partial l} &= w - \lambda \frac{\phi}{l} = 0, \\
+\frac{\partial \mathcal{L}}{\partial \lambda} &= \bar{u} - (1-\phi) \log c - \phi \log l = 0.
+\end{aligned}
+$$
+
+一階条件から, $c = \frac{1-\phi}{\phi}wl$ より, 効用制約に代入すると,
+
+$$
+\bar{u} = (1-\phi) \log \left(\frac{1-\phi}{\phi}wl\right) + \phi \log l = (1-\phi) \log \left(\frac{1-\phi}{\phi}w\right) + \log l.
+$$
+
+よって, 関数 $A(\bar{u}; \phi)$ を用いて, $l = A(\bar{u}; \phi) w^{-(1-\phi)}$ と表せるので,
+
+$$
+h^H(w, \bar{u}) = 1 - A(\bar{u}; \phi) w^{-(1-\phi)}.
+$$
+
+ヒックシアン弾力性は定義から,
+
+$$
+\begin{aligned}
+\eta_{h, w}^H &= \frac{\partial h^H(w, \bar{u})}{\partial w} \frac{w}{h^H(w, \bar{u})}\\
+&= (1-\phi) A(\bar{u}; \phi) w^{-(1-\phi)-1} \frac{w}{h^H(w, \bar{u})} \\
+&= (1-\phi) \frac{1 - h^H(w, \bar{u})}{h^H(w, \bar{u})} & \because 1 - h^H(w, \bar{u}) = A(\bar{u}; \phi) w^{-(1-\phi)} \\
+\end{aligned}
+$$
+
+ここで一階条件から $1 - h^H(w, \bar{u}) = \frac{\phi}{1-\phi}\frac{c}{w}$ であり, 均衡における予算制約 $c = w h^H(w, \bar{u}) + I$ を用いると,
+
+$$
+\begin{aligned}
+\eta_{h, w}^H &= \frac{\phi}{w} \frac{c}{h^H(w, \bar{u})} \\
+&= \frac{\phi}{w} \frac{w h^H(w, \bar{u}) + I}{h^H(w, \bar{u})} \\
+&= \frac{\phi}{w} \frac{I}{h^H(w, \bar{u})} + \phi.
+\end{aligned}
+$$
+
+
+
 :::
  
+
 
 ## Dynamic Model

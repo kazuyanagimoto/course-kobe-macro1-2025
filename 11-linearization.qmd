@@ -13,7 +13,8 @@ using LaTeXStrings
 using LinearAlgebra
 using Roots
 mypalette = ["#d5968c", "#c2676d", "#5c363a", "#995041", "#45939c", "#0f6a81"]
-default(size=(600, 370), titlefontsize=10, fmt=:svg, palette=mypalette[[6, 2, 4, 3, 1, 5]])
+default(size=(600, 370), titlefontsize=10, fmt=:svg, palette=mypalette[[6, 2, 4, 3, 1, 5]],
+    foreground_color_legend=nothing, grid=false)
 ```
 
 ## 対数変化率
@@ -132,7 +133,7 @@ $$
 
 :::
 
-_証明_
+::: {.proof}
 
 1. Logをとる
     - $\log Y_t = \log A_t + \alpha \log K_t + (1-\alpha)\log L_t$
@@ -141,6 +142,8 @@ _証明_
     - $RHS = \log A + \alpha \log K + (1-\alpha)\log L + \hat{A}_t + \alpha \hat{K}_t + (1-\alpha) \hat{L}_t$
 1. 定常状態を引く
     - $\hat{Y}_t = \hat{A}_t + \alpha \hat{K}_t + (1 - \alpha) \hat{L}_t$
+
+:::
 
 ::: {#exm-lin-euler-eq}
 
@@ -153,16 +156,16 @@ $$
 \end{aligned}
 \quad\Rightarrow\quad
 \begin{aligned}
-\hat{c}_{t+1} &= \hat{c}_t + \beta \alpha (\alpha-1)k^{\alpha-1} \hat{k}_t \\
+\hat{c}_{t+1} &= \hat{c}_t + \frac{\beta \alpha (\alpha-1)k^{\alpha-1}}{\sigma} \hat{k}_t \\
 \hat{k}_{t+1} &= -\frac{c}{k} \hat{c}_t + \frac{1}{\beta} \hat{k}_t.
 \end{aligned}
 $$
 
 :::
 
-_証明_
-
-**Step 1: Logをとる**
+::: {.proof}
+<br>
+**Step 1**: Logをとる
 
 $$
 \begin{aligned}
@@ -171,7 +174,7 @@ $$
 \end{aligned}
 $$
 
-**Step 2: 線形近似**
+**Step 2**: 線形近似
 
 $$
 \begin{aligned}
@@ -185,12 +188,12 @@ $$
 
 なお, $LHS_1^*, RHS_1^*, LHS_2^*, RHS_2^*$ は定常状態における値 (次のステップで消去される).
 
-**Step 3: 定常状態を引く**
+**Step 3**: 定常状態を引く
 
 $$
 \begin{aligned}
 -\sigma \hat{c}_t &= \frac{\alpha(\alpha-1)k^{\alpha-1}}{1-\delta + \alpha k^{\alpha-1}}\hat{k}_{t} - \sigma \hat{c}_{t+1} \\
-\frac{\alpha k^{\alpha-1} + 1 - \delta}{k^{\alpha} + (1-\delta)k} \hat{k}_t &= \frac{c}{c + k} \hat{c}_t + \frac{k}{c + k} \hat{k}_{t+1}
+\frac{\alpha k^{\alpha-1} + 1 - \delta}{k^{\alpha} + (1-\delta)k}k \hat{k}_t &= \frac{c}{c + k} \hat{c}_t + \frac{k}{c + k} \hat{k}_{t+1}
 \end{aligned}
 $$
 
@@ -207,10 +210,12 @@ $$
 
 $$
 \begin{aligned}
-\hat{c}_{t+1} &= \hat{c}_t + \beta \alpha (\alpha-1)k^{\alpha-1} \hat{k}_t \\
+\hat{c}_{t+1} &= \hat{c}_t + \frac{\beta \alpha (\alpha-1)k^{\alpha-1}}{\sigma} \hat{k}_t \\
 \hat{k}_{t+1} &= -\frac{c}{k} \hat{c}_t + \frac{1}{\beta} \hat{k}_t.
 \end{aligned}
 $$
+
+:::
 
 ## 対数線形化のもう一つの方法
 
@@ -241,6 +246,65 @@ $$
 
 よって, この方法でも同じ結果が得られます.
 
+::: {#exm-lin-ramsey-alt}
+
+## Ramsey Model
+
+$$
+\begin{aligned}
+&c_t^{-\sigma} = \beta(1-\delta+\alpha k_{t}^{\alpha-1})c_{t+1}^{-\sigma} \\
+& k_t^\alpha + (1-\delta)k_t = c_t + k_{t+1}
+\end{aligned}
+\quad\Rightarrow\quad
+\begin{aligned}
+\hat{c}_{t+1} &= \hat{c}_t + \frac{\beta \alpha (\alpha-1)k^{\alpha-1}}{\sigma} \hat{k}_t \\
+\hat{k}_{t+1} &= -\frac{c}{k} \hat{c}_t + \frac{1}{\beta} \hat{k}_t.
+\end{aligned}
+$$
+
+:::
+
+::: {.proof}
+<br>
+
+**Step 1**: 置き換え
+
+$$
+\begin{aligned}
+&\exp(-\sigma \log c_t) = \beta(1-\delta+\alpha \exp((\alpha-1)\log k_{t}))\exp(-\sigma \log c_{t+1}) \\
+&  \exp(\alpha \log k_t) + (1-\delta)\exp(\log k_t) = \exp(\log c_t) + \exp(\log k_{t+1})
+\end{aligned}
+$$
+
+**Step 2**: 線形近似
+
+$$
+\begin{aligned}
+LHS_1 &\approx LHS_1^* + \exp(-\sigma \log c)(-\sigma)(\log c_t - \log c) \\
+&= LHS_1^* - \sigma c^{-\sigma} \hat{c}_t \\
+RHS_1 &\approx RHS_1^* + \beta \alpha(\alpha-1)\exp(-\sigma \log c)\exp((\alpha-1)\log k)(\log k_t - \log k) \\
+&+\beta (1-\delta+\alpha \exp((\alpha-1)\log k))\exp(-\sigma \log c)(-\sigma)(\log c_{t+1} - \log c) \\
+&= RHS_1^* + \beta \alpha (\alpha-1) k^{\alpha-1} c^{-\sigma} \hat{k}_t - \sigma \beta(1-\delta+\alpha k^{\alpha-1}) c^{-\sigma} \hat{c}_{t+1} \\
+LHS_2 &\approx LHS_2^* + (\alpha\exp(\alpha \log k) + (1-\delta)\exp(\log k))(\log k_t - \log k) \\
+&= LHS_2^* + \left(\alpha k^{\alpha-1} + 1 - \delta\right) k \hat{k}_t \\
+RHS_2 &\approx RHS_2^* + \exp(\log c)(\log c_t - \log c) + \exp(\log k)(\log k_{t+1} - \log k) \\
+&= RHS_2^* + c \hat{c}_t + k \hat{k}_{t+1}
+\end{aligned}
+$$
+
+**Step 3**: 定常状態を引き, 定常状態で割る
+
+$$
+\begin{aligned}
+\hat{c}_{t+1} &= \hat{c}_t + \frac{\beta \alpha (\alpha-1)k^{\alpha-1}}{\sigma} \hat{k}_t \\
+\hat{k}_{t+1} &= -\frac{c}{k} \hat{c}_t + \frac{1}{\beta} \hat{k}_t.
+\end{aligned}
+$$
+
+ここで, $\frac{1}{\beta} = 1 - \delta + \alpha k^{\alpha-1}$ を用いた.
+
+:::
+
 
 ## (補論) 数値計算例
 
@@ -253,7 +317,7 @@ $$
 \end{aligned}
 \quad\Rightarrow\quad
 \begin{aligned}
-\hat{c}_{t+1} &= \hat{c}_t + \beta \alpha (\alpha-1)k^{\alpha-1} \hat{k}_t \\
+\hat{c}_{t+1} &= \hat{c}_t + \frac{\beta \alpha (\alpha-1)k^{\alpha-1}}{\sigma} \hat{k}_t \\
 \hat{k}_{t+1} &= -\frac{c}{k} \hat{c}_t + \frac{1}{\beta} \hat{k}_t.
 \end{aligned}
 $$
@@ -293,7 +357,7 @@ $$
 \end{pmatrix}
 =
 \underbrace{\begin{pmatrix}
-1 & \beta \alpha (\alpha-1) k^{\alpha-1} \\
+1 & \frac{\beta \alpha (\alpha-1) k^{\alpha-1}}{\sigma} \\
 -\frac{c}{k} & \frac{1}{\beta}
 \end{pmatrix}}_{M}
 \begin{pmatrix}
@@ -305,7 +369,7 @@ $$
 ここでは, $\hat{k}_0 = 0.01$ (定常状態から1%の増加) からの変化を考えます. Saddle path 上の $\hat{c}_0$ を求めるために, 固有値分解を行います.
 
 ```{julia}
-M = [1 pars.β*pars.α*(pars.α-1)*k_ss(pars)^(pars.α-1)
+M = [1 pars.β*pars.α*(pars.α-1)*k_ss(pars)^(pars.α-1)/pars.σ
     -c_ss(pars)/k_ss(pars) 1/pars.β]
 λ, P = eigen(M)
 ```
@@ -342,7 +406,7 @@ end
 p1 = plot(1:T, ĉs, label=L"\hat{c}_t", xlabel=L"t",
     ylabel="Deviation from Steady State", title="Impulse Response",
     yformatter=y -> string(round(y * 100, digits=2), "%"))
-plot!(p1, 1:T, k̂s, label=L"\hat{k}_t")
+plot!(p1, 1:T, k̂s, label=L"\hat{k}_t", linestyle=:dash)
 
 # Phase Diagram
 k̂_min = -0.01
@@ -351,12 +415,18 @@ k̂s_grid = k̂_min:0.0001:k̂_max
 ks_grid = k_ss(pars) .* (1 .+ k̂s_grid)
 cs_grid = c_ss(pars) .* (1 .+ k̂s_grid .* P[1, 1] ./ P[2, 1])
 
-p2 = vline([k_ss(pars)], label=L"\dot{c} = 0", title="Phase Diagram",
+p2 = vline([k_ss(pars)], label=false, title="Phase Diagram",
     ylims=(cs_grid[begin], cs_grid[end]))
-plot!(p2, ks_grid, k -> k^pars.α - pars.δ * k, label=L"\dot{k} = 0")
-plot!(p2, ks_grid, cs_grid, xlabel=L"k_t", ylabel=L"c_t", label="Saddle Path",
+annotate!(p2, k_ss(pars) * 1.001, cs_grid[end] * 0.9999,
+    text(L"\dot{k} = 0", :left, 10))
+plot!(p2, ks_grid, k -> k^pars.α - pars.δ * k, label=false)
+annotate!(p2, ks_grid[end] * 0.995,
+    (ks_grid[end]^pars.α - pars.δ * ks_grid[end]) * 0.999,
+    text(L"\dot{c}=0", :left, 10))
+plot!(p2, ks_grid, cs_grid, xlabel=L"k_t", ylabel=L"c_t", label=false,
     color=:black, linestyle=:dash)
-scatter!(p2, [k_ss(pars)], [c_ss(pars)], label="Steady State", color=:white)
+scatter!(p2, [k_ss(pars)], [c_ss(pars)], label=false, color=:white)
+annotate!(p2, k_ss(pars) * 0.998, c_ss(pars) * 1.0005, text(L"SS", :left, 8))
 
 plot(p1, p2, layout=(1, 2))
 ```
@@ -453,9 +523,10 @@ k̂s_nl = ks_right ./ k_ss(pars) .- 1
 p1 = plot(1:T, ĉs, label=L"$\hat{c}_t$ (Linear)", xlabel=L"t",
     ylabel="Deviation from Steady State",
     yformatter=y -> string(round(y * 100, digits=2), "%"),
-    title="Impulse Response", color=mypalette[6])
+    title="Impulse Response", color=mypalette[6],
+    linestyle=:dot)
 plot!(p1, 1:T, ĉs_nl[1:T], label=L"$\hat{c}_t$ (Nonlinear)", color=mypalette[6], linestyle=:dash)
-plot!(p1, 1:T, k̂s, label=L"$\hat{k}_t$ (Linear)", color=mypalette[2])
+plot!(p1, 1:T, k̂s, label=L"$\hat{k}_t$ (Linear)", color=mypalette[2], linestyle=:dot)
 plot!(p1, 1:T, k̂s_nl[1:T], label=L"$\hat{k}_t$ (Nonlinear)", color=mypalette[2], linestyle=:dash)
 
 # Phase Diagram
@@ -463,13 +534,19 @@ k̂s_grid = k̂_min:0.0001:k̂_max
 ks_grid = k_ss(pars) .* (1 .+ k̂s_grid)
 cs_grid = c_ss(pars) .* (1 .+ k̂s_grid .* P[1, 1] ./ P[2, 1])
 p2 = plot(ks_grid, cs_grid, xlabel=L"k_t", ylabel=L"c_t",
-    label="Saddle Path (Linear)", title="Phase Diagram", color=:black, linestyle=:dash)
-plot!(p2, vcat(ks_left, reverse(ks_right)), vcat(cs_left, reverse(cs_right)), label="Saddle Path (Nonlinear)", color=:gray, linestyle=:dot)
-vline!(p2, [k_ss(pars)], label=L"\dot{c} = 0", color=mypalette[6])
-plot!(p2, ks_grid, k -> k^pars.α - pars.δ * k, label=L"\dot{k} = 0", color=mypalette[2])
-scatter!(p2, [k_ss(pars)], [c_ss(pars)], label="Steady State", color=:white)
+    label="Linear", title="Phase Diagram", color=:black, linestyle=:dash)
+plot!(p2, vcat(ks_left, reverse(ks_right)), vcat(cs_left, reverse(cs_right)),
+    label="Nonlinear", color=:gray, linestyle=:dot)
+vline!(p2, [k_ss(pars)], label=false, color=mypalette[6])
+annotate!(k_ss(pars) * 1.001, cs_grid[end], text(L"\dot{k} = 0", :left, 10))
+plot!(p2, ks_grid, k -> k^pars.α - pars.δ * k, label=false, color=mypalette[2])
+annotate!(p2, ks_grid[end] * 0.995,
+    (ks_grid[end]^pars.α - pars.δ * ks_grid[end]) * 0.999,
+    text(L"\dot{c}=0", :left, 10))
+scatter!(p2, [k_ss(pars)], [c_ss(pars)], label=false, color=:white)
+annotate!(k_ss(pars) * 0.999, c_ss(pars) * 1.0007, text(L"SS", :top, 10))
 
 plot(p1, p2, layout=(1, 2))
 ```
 
-
+@fig-ramsey-nl に示すように, 線形化モデルと非線形モデルのIRFやSaddle Pathはほとんど一致していることがわかります.

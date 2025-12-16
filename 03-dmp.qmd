@@ -21,7 +21,8 @@ import Random
 Random.seed!(1234)
 
 mypalette = ["#d5968c", "#c2676d", "#5c363a", "#995041", "#45939c", "#0f6a81"]
-default(size=(600, 370), titlefontsize=10, fmt=:svg, palette=mypalette[[6, 2, 4, 3, 1, 5]])
+default(size=(600, 370), titlefontsize=10, fmt=:svg, grid=false,
+    foreground_color_legend=nothing, palette=mypalette[[6, 2, 4, 3, 1, 5]])
 ```
 
 ## DMP Framework とは

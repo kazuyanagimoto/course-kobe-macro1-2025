@@ -8,7 +8,7 @@
 
 $$
 \max_{c, h} u(c, h) \quad \text{ s.t. } c \leq w h + I.
-$$
+$${#eq-labor-static}
 
 ここで, 消費 $c \geq 0$, 労働供給 $h \geq 0$, 賃金率 $w > 0$, 非労働所得 $I \geq 0$ です. また, 賃金率 $w$ と非労働所得 $I$ に対する労働供給を $h(w, I)$ とします. この時, 労働供給の弾力性は以下で定義されます:
 
@@ -175,10 +175,142 @@ $$
 \end{aligned}
 $$
 
+:::
+ 
+## Dynamic Model
+
+次の動学的労働供給モデルを考えます:
+
+$$
+V(a) = \max_{c, h, a'} u(c, h) + \beta V(a') \quad \text{s.t. } c + a' = (1 + r)a + wh.
+$$
+
+ここで, $I := (1+r)a - a'$ と置くと, 静学的な労働供給モデル (-@eq-labor-static) と同じ形になります. 動学的な労働供給モデルにおける賃金弾力性には, 主に次の3種類があります.
+
+1. Marshallian 弾力性: 所得を一定とした下での労働供給の弾力性
+2. Hicksian 弾力性: 効用のレベルを一定とした下での労働供給の弾力性
+3. Frisch 弾力性: 限界効用を一定にした下での労働供給の弾力性
+
+**Marshallian & Hicksian Elasticities**
+
+Marshallian 弾力性は, 静学的な労働供給と同様に定義することが可能です. 直感的には, 賃金が下落した際に貯金を切り崩すといった埋め合わせ (compensation) 行動は可能ですが, その点を考慮せずに, 所得 $I$ を一定とした下での労働供給の弾力性として定義されます. その意味でMarshallian 弾力性は uncompesated elasticity とも呼ばれます.
+
+Hicksian 弾力性も静学的な労働供給と同様に定義することが可能です. 賃金が下落した際に貯金を切り崩すことで効用水準を一定に保つ状況を考えるという意味で, Hicksian 弾力性は compensated elasticity とも呼ばれます.
+
+::: {#exm-labor-crra}
+
+## CRRA Utility
+
+$$
+u(c, h) = \frac{c^{1-\sigma}-1}{1-\sigma} - \psi \frac{h^{1+\frac{1}{\gamma}}}{1+\frac{1}{\gamma}}.
+$$
+
+$$
+\eta_{h, w}^M = \frac{1 - \sigma(1-s)}{\frac{1}{\gamma} + \sigma(1-s)}.
+$$
+
+- 代替効果: $\eta_{h, w}^H = \frac{1}{\frac{1}{\gamma} + \sigma(1-s)}$
+- 所得効果: $\eta_{h, I}\frac{wh}{I} = -\frac{\sigma - \sigma s}{\frac{1}{\gamma} + \sigma(1-s)}$
+
+where $s = \frac{I}{c}$.
+
 
 
 :::
- 
 
+::: {.proof}
 
-## Dynamic Model
+Intra-temporal な最適条件より,
+
+$$
+c^{-\sigma} w = \psi h^{\frac{1}{\gamma}}.
+$${#eq-labor-crra-intra}
+
+対数をとって, $\log w$ で微分すると,
+
+$$
+-\sigma \frac{\partial \log c}{\partial \log w} + 1 = \frac{1}{\gamma} \frac{\partial \log h}{\partial \log w}.
+$${#eq-labor-crra-intra-wage}
+
+予算制約 $\log c = \log (w h + I)$ を $\log w$ で微分すると,
+
+$$
+\begin{aligned}
+\frac{\partial \log c}{\partial \log w} &= \frac{1}{wh + I}\frac{\partial (wh+I)}{\partial w}\frac{\partial w}{\partial \log w} \\
+&= \frac{wh}{wh + I}\left(1 + \frac{\partial \log h}{\partial \log w}\right)\\
+&= (1 - s) \left(1 + \frac{\partial \log h}{\partial \log w}\right).
+\end{aligned}
+$$
+
+これを @eq-labor-crra-intra-wage に代入すると,
+
+$$
+\eta_{h, w}^M = \frac{\partial \log h}{\partial \log w} = \frac{1 - \sigma(1-s)}{\frac{1}{\gamma} + \sigma(1-s)}.
+$$
+
+@eq-labor-crra-intra の対数を取って, $\log I$ で微分すると,
+
+$$
+-\sigma \frac{\partial \log c}{\partial \log I} = \frac{1}{\gamma} \frac{\partial \log h}{\partial \log I}.
+$${#eq-labor-crra-intra-income}
+
+予算制約 $\log c = \log (w h + I)$ を $\log I$ で微分すると,
+
+$$
+\begin{aligned}
+\frac{\partial \log c}{\partial \log I} &= \frac{1}{wh + I}\frac{\partial (wh+I)}{\partial \log I} \\
+&= \frac{1}{wh + I}\left(wh\frac{\partial \log h}{\partial \log I} + I\right)\\
+&= \frac{1}{c}\left((c-I)\frac{\partial \log h}{\partial \log I}+ I\right) \\
+&= (1 - s) \frac{\partial \log h}{\partial \log I}+ s.
+\end{aligned}
+$$
+
+これを @eq-labor-crra-intra-income に代入すると,
+
+$$
+\eta_{h, I} = \frac{\partial \log h}{\partial \log I} = -\frac{\sigma s}{\frac{1}{\gamma} + \sigma(1-s)}.
+$$
+
+スルツキーの恒等式より,
+
+$$
+\begin{aligned}
+\eta_{h, w}^H &= \eta_{h, w}^M - \eta_{h, I} \frac{wh}{I} \\
+&= \frac{1 - \sigma(1-s)}{\frac{1}{\gamma} + \sigma(1-s)} + \frac{\sigma s}{\frac{1}{\gamma} + \sigma(1-s)} \left(\frac{1}{s} - 1\right) \\
+&=\frac{1}{\frac{1}{\gamma} + \sigma(1-s)}.
+\end{aligned}
+$$
+
+:::
+
+**Frisch Elasticity**
+
+Frisch 弾力性は, 消費の限界効用を一定にした下での労働供給の弾力性として定義されます. また, しばしば lifetime wealth に対する限界効用を一定にした下での労働供給の弾力性としても定義されます. これは恒常所得仮説 (permanent income hypothesis) に基づくと, 消費の限界効用が lifetime wealth のみに依存すると考えるためです.
+
+直感的には, 一時的な賃金の上昇は lifetime wealth にほとんど影響を与えないため, Frisch 弾力性は一時的な賃金変動に対する労働供給の反応を捉えると考えられます. そのため, RBCモデルなどで確率過程に基づく賃金変動が考慮される場合, Frisch 弾力性が重要な役割を果たします.
+
+一階条件から, ラグランジュ乗数は $\lambda = u_c(c, h)$ であり, Frish 弾力性はこの $\lambda$ を一定にした下での労働供給の弾力性として定義されます. すなわち, $u_h(c, h) = -\lambda w$ より, 
+
+$$
+u_{cc} \frac{\partial c}{\partial w} + u_{ch} \frac{\partial h}{\partial w} = 0 \text{ and }
+u_{hc} \frac{\partial c}{\partial w} + u_{hh} \frac{\partial h}{\partial w} = -\lambda.
+$$
+
+これを $\frac{\partial h}{\partial w}$ について解くと,
+
+$$
+\frac{\partial h}{\partial w} = \frac{u_{h}}{u_{hh} - \frac{u_{ch}^2}{u_{cc}}} \frac{1}{w}.
+$$
+
+Frisch 弾力性 $\eta_{h, w}^F := \frac{\partial h}{\partial w}\frac{w}{h}|_{\lambda}$ より,
+
+$$
+\eta_{h, w}^F = \frac{u_{h}}{h\left(u_{hh} - \frac{u_{ch}^2}{u_{cc}}\right)}.
+$$
+
+なお, この式から自明に @exm-labor-crra において $\eta_{h, w}^F = \gamma$ となります. @chetty2011 はメタ分析を行い, Frisch 弾力性の平均的な推定値を報告しました.
+
+- **ミクロ分析** (擬似実験, quasi-experiment): 0.82
+- **マクロモデル**: 2.84
+
+マクロモデルの結果は, RBCモデルなどで雇用は実質賃金よりも volatile であることを反映しています. この「マクロモデルの Frisch 弾力性はミクロ分析よりもかなり大きい」というPuzzleに関しては今も議論が続いています (e.g., @erosa2016).

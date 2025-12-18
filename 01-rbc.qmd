@@ -249,9 +249,9 @@ $$
 
 $$
 \begin{aligned}
-&V(k_0, z_0) = \max_{k_1, n_0} U(z_0F(k_0, n_0) + (1-\delta)k_0 - k_1, n_0) \\
+&V(k_0, z_0) = \max_{k_1, n_0} U(z_0F(k_0, n_0) + (1-\delta)k_0 - k_1, 1 - n_0) \\
 &+ \beta \mathbb{E}_{z_1}\left[ 
-\underbrace{\max_{\{k_{t+2}(z_{t+1}), n_{t+1}(z_{t+1})\}_{t=0}^{\infty}} \mathbb{E}_1 \sum_{t=0}^{\infty} \beta^{t} U(z_{t+1}F(k_{t+1}, n_{t+1}) + (1-\delta)k_{t+1} - k_{t+2}, 1 - n_{t+1})}_{V(k_1, z_1)}\middle| z_0 \right].
+\underbrace{\max_{\{k_{t+2}(z_{t+1}), n_{t+1}(z_{t+1})\}_{t=0}^{\infty}} \mathbb{E}_1 \sum_{t=0}^{\infty} \beta^{t} U(z_{t+1}F(k_{t+1}, 1 - n_{t+1}) + (1-\delta)k_{t+1} - k_{t+2}, 1 - n_{t+1})}_{V(k_1, z_1)}\middle| z_0 \right].
 \end{aligned}
 $$
 

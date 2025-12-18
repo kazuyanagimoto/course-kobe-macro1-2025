@@ -62,8 +62,7 @@ $$
 
 RBCモデルに価格がなぜ登場しなかったかというと, RBCモデルでは価格が完全に柔軟 (flexible) であると仮定しており, 価格が経済に影響を与えない **貨幣中立性 (monetary neutrality)** が成立しているからです.
 
-ここで, 従来のRBCモデルに価格 $P_t$ を導入してみます. 単純化のために, 生産関数を $y_t = w_t n_t$ とし, 名目貯蓄を $A_t$ とします. すると,
-家計の予算制約は以下のようになります.
+ここで, 従来のRBCモデルに価格 $P_t$ を導入してみます. 単純化のために, 生産関数を $y_t = w_t n_t$ とし, 名目貯蓄を $A_t$ とします. すると, 家計の予算制約は以下のようになります.
 
 $$
 P_t c_t + A_{t} = P_t w_t n_t + (1 + i_t) A_{t-1}.
@@ -173,7 +172,7 @@ $$
 
 $$
 \begin{aligned}
-V(B_t) &= \max_{C_t, N_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}[V(B_{t+1})] \\
+V(B_{t-1}) &= \max_{C_t, N_t, B_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}[V(B_{t})] \\
 &=\max_{C_t, N_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}\left[V\left((1+i_t)(W_t N_t + \Pi_t + B_{t-1} - P_t C_t)\right)\right]
 \end{aligned}
 $$
@@ -197,6 +196,14 @@ C_t^{-\sigma}\frac{W_t}{P_t} &= N_t^{\phi} & \text{(Intratemporal labor supply)}
 \end{aligned}
 $${#eq-opt-household}
 
+これは実質値を考えると, RBCモデルと同じ含意が得られることが分かります.
+
+$$
+\begin{aligned}
+C_t^{-\sigma} &= \beta \mathbb{E}\left[(1 + r_t) C_{t+1}^{-\sigma}\right] \\
+C_t^{-\sigma} w_t &= N_t^{\phi}
+\end{aligned}
+$$
 
 ### 企業
 

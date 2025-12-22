@@ -15,7 +15,7 @@ engine: julia
 最終財の価格 $P_t$ は中間財の価格 $P_{j, t}$ を用いて以下のように表される:
 
 $$
-P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon}\right)^{\frac{1}{1-\varepsilon}}.
+P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \, dj \right)^{\frac{1}{1-\varepsilon}}.
 $$
 
 また, 各中間財の需要 $Y_{j, t}$ は以下のように表される:
@@ -31,18 +31,18 @@ $$
 最終財の生産者が $Y_t$ 単位の最終財を生産する時の費用最小化問題を考える.
 
 $$
-\min_{\{Y_{j, t}\}_{j=0}^{1}} \int_{0}^{1} P_{j, t} Y_{j, t} dj \quad \text{s.t.} \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}} = Y_t.
+\min_{\{Y_{j, t}\}_{j=0}^{1}} \int_{0}^{1} P_{j, t} Y_{j, t} \, dj \quad \text{s.t.} \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}} = Y_t.
 $$
 
 $$
-\mathcal{L} = \int_{0}^{1} P_{j, t} Y_{j, t} dj + \lambda_t \left(Y_t - \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}}\right)
+\mathcal{L} = \int_{0}^{1} P_{j, t} Y_{j, t} \, dj + \lambda_t \left(Y_t - \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}}\right)
 $$
 
 FOC:
 
 $$
 \begin{aligned}
-P_{j, t} &= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon-1}{\varepsilon}}\right)^{\frac{1}{\varepsilon - 1}}}_{= Y_{t}^{\frac{1}{\varepsilon}}} Y_{j, t}^{-\frac{1}{\varepsilon}} \\
+P_{j, t} &= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon-1}{\varepsilon}} \, dj \right)^{\frac{1}{\varepsilon - 1}}}_{= Y_{t}^{\frac{1}{\varepsilon}}} Y_{j, t}^{-\frac{1}{\varepsilon}} \\
 &= \lambda_t \left(\frac{Y_{j, t}}{Y_t}\right)^{-\frac{1}{\varepsilon}}.
 \end{aligned}
 $${#eq-foc-ces}
@@ -54,7 +54,7 @@ $$
 \int_{j=0}^{1} P_{j, t} Y_{j, t} \,dj = \lambda_t Y_t^{\frac{1}{\varepsilon}} \underbrace{\int_{j=0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj}_{=Y_t^{\frac{\varepsilon-1}{\varepsilon}}} = \lambda_t Y_t
 $$
 
-ここで $\left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \,dj\right)^{\frac{1}{1-\varepsilon}} = \lambda_t Y_t$ という表現を見ると, 左辺は最終財を生産するための費用であることから, $\lambda_t$ は最終財の価格と解釈できることがわかります.
+ここで $\int_{j=0}^{1} P_{j, t} Y_{j, t} \,dj = \lambda_t Y_t$ という表現を見ると, 左辺は最終財を生産するための費用であることから, $\lambda_t$ は最終財の価格と解釈できることがわかります.
 
 ここで @eq-foc-ces の両辺を $1-\varepsilon$ 乗して, $j$ について積分し, $\frac{1}{1-\varepsilon}$ 乗すると
 
@@ -128,7 +128,7 @@ $$
 これを対数線形化すると,
 
 $$
-\pi_t= \beta \mathbb{E}[\hat{\pi}_{t+1}] + (1-\beta)\pi +
+\pi_t= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +
 \frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +
 \frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right]
 $$
@@ -143,7 +143,7 @@ $$
 LHS = (1-\exp(\log MC_{t}^r))\varepsilon \approx (1-MC^r)\varepsilon - \varepsilon MC^r \widehat{MC^r}_{t}.
 $$
 
-$RHS = 1 - RHS_1 + \varphi\beta\mathbb{E}[RHS_2]$ とします.
+$RHS = 1 - RHS_1 + \varphi\beta\mathbb{E}_t\left[RHS_2\right]$ とします.
 
 $$
 \begin{aligned}
@@ -158,12 +158,12 @@ $LHS = RHS$ であり, 定常状態 $(1-MC^r)\varepsilon = 1 - (1-\beta)\varphi\
 
 $$
 \begin{aligned}
-\pi_{t} - \pi &= \beta \mathbb{E}[\hat{\pi}_{t+1} - \pi]
+\pi_{t} - \pi &= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1} - \pi\right]
 +\frac{\varepsilon MC^r}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t}
-+\frac{\beta\pi}{\varphi(1 + 2\pi)}\mathbb{E}\left[-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right] \\
-\pi_t&= \beta \mathbb{E}[\hat{\pi}_{t+1}] + (1-\beta)\pi +
++\frac{\beta\pi}{\varphi(1 + 2\pi)}\mathbb{E}_t\left[-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right] \\
+\pi_t&= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +
 \frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +
-\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right].
+\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}_t\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right].
 \end{aligned}
 $$
 

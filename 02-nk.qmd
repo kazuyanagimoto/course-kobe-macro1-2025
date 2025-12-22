@@ -100,8 +100,8 @@ New Keynesian モデルの基本的な枠組みはRBCモデルに価格硬直性
 
 $$
 \begin{aligned}
-\widetilde{Y}_t &= \mathbb{E}_t[\widetilde{Y}_{t+1}] - \frac{1}{\sigma}\left(i_t - r_t^n -\mathbb{E}[\pi_{t+1}]\right) & \text{(NK IS Curve)} \\
-\pi_{t} &= \beta \mathbb{E}_t[\pi_{t+1}] + \kappa \widetilde{Y}_t & \text{(NK Phillips Curve)} \\
+\widetilde{Y}_t &= \mathbb{E}_t\left[\widetilde{Y}_{t+1}\right] - \frac{1}{\sigma}\left(i_t - r_t^n -\mathbb{E}_t\left[\pi_{t+1}\right]\right) & \text{(NK IS Curve)} \\
+\pi_{t} &= \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \kappa \widetilde{Y}_t & \text{(NK Phillips Curve)} \\
 i_t &= r_t + \phi_{\pi}\pi_t + \phi_y \widetilde{Y}_t & \text{(MP Rule)}\\
 \end{aligned}
 $$
@@ -172,8 +172,8 @@ $$
 
 $$
 \begin{aligned}
-V(B_{t-1}) &= \max_{C_t, N_t, B_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}[V(B_{t})] \\
-&=\max_{C_t, N_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}\left[V\left((1+i_t)(W_t N_t + \Pi_t + B_{t-1} - P_t C_t)\right)\right]
+V(B_{t-1}) &= \max_{C_t, N_t, B_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}_t\left[V(B_{t})\right] \\
+&=\max_{C_t, N_t} \frac{C_t^{1-\sigma}}{1-\sigma} - \frac{N_t^{1+\phi}}{1+\phi} + \beta \mathbb{E}_t\left[V\left((1+i_t)(W_t N_t + \Pi_t + B_{t-1} - P_t C_t)\right)\right]
 \end{aligned}
 $$
 
@@ -181,9 +181,9 @@ $$
 
 $$
 \begin{aligned}
-C_t^{-\sigma} &= \beta (1+i_t) P_t \mathbb{E}\left[V'(B_{t})\right] & \text{(FOC of $C_t$)} \\
-N_t^{\phi} &= \beta (1+i_t) W_t \mathbb{E}\left[V'(B_{t})\right] & \text{(FOC of $N_t$)}\\
-V'(B_{t-1}) &= \beta (1+i_t)\mathbb{E}\left[V'(B_{t})\right] & \text{(EC of $B_t$)}
+C_t^{-\sigma} &= \beta (1+i_t) P_t \mathbb{E}_t\left[V'(B_{t})\right] & \text{(FOC of $C_t$)} \\
+N_t^{\phi} &= \beta (1+i_t) W_t \mathbb{E}_t\left[V'(B_{t})\right] & \text{(FOC of $N_t$)}\\
+V'(B_{t-1}) &= \beta (1+i_t)\mathbb{E}_t\left[V'(B_{t})\right] & \text{(EC of $B_t$)}
 \end{aligned}
 $$
 
@@ -191,7 +191,7 @@ $$
 
 $$
 \begin{aligned}
-C_t^{-\sigma} &= \beta \mathbb{E}\left[\frac{P_t}{P_{t+1}} (1+i_t)C_{t+1}^{-\sigma}\right] & \text{(Euler equation)} \\
+C_t^{-\sigma} &= \beta \mathbb{E}_t\left[\frac{P_t}{P_{t+1}} (1+i_t)C_{t+1}^{-\sigma}\right] & \text{(Euler equation)} \\
 C_t^{-\sigma}\frac{W_t}{P_t} &= N_t^{\phi} & \text{(Intratemporal labor supply)}
 \end{aligned}
 $${#eq-opt-household}
@@ -200,7 +200,7 @@ $${#eq-opt-household}
 
 $$
 \begin{aligned}
-C_t^{-\sigma} &= \beta \mathbb{E}\left[(1 + r_t) C_{t+1}^{-\sigma}\right] \\
+C_t^{-\sigma} &= \beta \mathbb{E}_t\left[(1 + r_t) C_{t+1}^{-\sigma}\right] \\
 C_t^{-\sigma} w_t &= N_t^{\phi}
 \end{aligned}
 $$
@@ -212,7 +212,7 @@ $$
 消費者は最終財 (final good) を消費します. 最終財は代表的企業が中間財 $j \in [0, 1]$ を以下のCES生産関数で生産します.
 
 $$
-Y_t = \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \right)^{\frac{\varepsilon}{\varepsilon - 1}}.
+Y_t = \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}}.
 $$
 
 - $Y_{j, t}$: 中間財 $j$ の生産量
@@ -229,7 +229,7 @@ $$
 最終財の価格 $P_t$ は中間財の価格 $P_{j, t}$ を用いて以下のように表されます.
 
 $$
-P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon}\right)^{\frac{1}{1-\varepsilon}}.
+P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \, dj \right)^{\frac{1}{1-\varepsilon}}.
 $$
 
 証明は @prp-price-index を参照してください.
@@ -345,6 +345,12 @@ $$
 MC_{t}^{r} = \frac{\varepsilon - 1}{\varepsilon} =: \frac{1}{\mu}.
 $$
 
+ここで, $\mu := \frac{\varepsilon}{\varepsilon - 1}$ はマークアップ率 (markup rate) と呼ばれます. マークアップ率は, 企業が価格を設定する際に, 限界費用に対してどれだけ上乗せするかを示す指標です. すなわち,
+
+$$
+\frac{P_t}{MC_t} = \frac{1}{MC_t^r} =: \mu.
+$$
+
 Flexible price の均衡における値を $X^n$ で表すと,
 
 $$
@@ -385,7 +391,7 @@ $$
 これを対数線形化すると (@prp-lin-nkis), 以下の式を得ます.
 
 $$
-\hat{C}_t = \mathbb{E}_t[\hat{C}_{t+1}] - \frac{1}{\sigma}\left(i_t - \log \beta - \mathbb{E}_t[\pi_{t+1}] \right)
+\hat{C}_t = \mathbb{E}_t\left[\hat{C}_{t+1}\right] - \frac{1}{\sigma}\left(i_t - \log \beta - \mathbb{E}_t\left[\pi_{t+1}\right] \right)
 $$
 @lem-output-gap より, 産出ギャップは $\widetilde{Y}_t = \hat{Y}_t - \hat{Y}_t^n$ であり, @eq-lin-output-flexible を用いると,
 
@@ -396,13 +402,13 @@ $$
 Good Market Clearing ($C_t = Y_t$) より, $\hat{C}_t = \hat{Y}_t$ なので,
 
 $$
-\widetilde{Y}_t = \mathbb{E}_t[\widetilde{Y}_{t+1}] - \frac{1}{\sigma}\left(i_t - r_t^n - \mathbb{E}_t[\pi_{t+1}]\right)
+\widetilde{Y}_t = \mathbb{E}_t\left[\widetilde{Y}_{t+1}\right] - \frac{1}{\sigma}\left(i_t - r_t^n - \mathbb{E}_t\left[\pi_{t+1}\right]\right)
 $${#eq-nk-is}
 
 ここで, 自然利子率 $r_t^n$ は以下で定義されます.
 
 $$
-r_t^n := -\log \beta + \frac{\sigma(1+\phi)}{\sigma + \phi}\left(\hat{A}_t - \mathbb{E}\left[\hat{A}_{t+1}\right]\right).
+r_t^n := -\log \beta + \frac{\sigma(1+\phi)}{\sigma + \phi}\left(\hat{A}_t - \mathbb{E}_t\left[\hat{A}_{t+1}\right]\right).
 $$
 
 定常状態では明らかに $r^n = -\log \beta$ となります.
@@ -421,28 +427,28 @@ $$
 
 $$
 \begin{aligned}
-\pi_t&= \beta \mathbb{E}[\hat{\pi}_{t+1}] + (1-\beta)\pi +
+\pi_t&= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +
 \frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} \\
-&+\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right]
+&+\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}_t\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right]
 \end{aligned}
 $$
 
 $\pi = 0$ より,
 
 $$
-\hat{\pi}_{t} = \beta \mathbb{E}\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} \widehat{MC^r}_{t}.
+\hat{\pi}_{t} = \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} \widehat{MC^r}_{t}.
 $$
 
 @lem-lin-mc を用いて,
 
 $$
-\hat{\pi}_{t} = \beta \mathbb{E}\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} (\sigma+\phi)\widetilde{Y}_t.
+\hat{\pi}_{t} = \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} (\sigma+\phi)\widetilde{Y}_t.
 $$
 
 $\kappa = \frac{(\varepsilon-1)(\sigma+\phi)}{\varphi}$ とすると,
 
 $$
-\pi_t = \beta \mathbb{E}\left[\pi_{t+1}\right] + \kappa \widetilde{Y}_t.
+\pi_t = \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \kappa \widetilde{Y}_t.
 $${#eq-nk-pc}
 
 
@@ -522,8 +528,8 @@ $$
 \sigma\kappa & \kappa+\beta(\sigma+\phi_y)
 \end{pmatrix}}_{\Lambda}
 \begin{pmatrix}
-\mathbb{E}[\widetilde{Y}_{t+1}] \\
-\mathbb{E}[\pi_{t+1}]
+\mathbb{E}_t\left[\widetilde{Y}_{t+1}\right] \\
+\mathbb{E}_t\left[\pi_{t+1}\right]
 \end{pmatrix}
 +\omega\underbrace{\begin{pmatrix}
 1\\
@@ -550,7 +556,7 @@ $$
 \psi_y\\\psi_{\pi}
 \end{pmatrix}\eta_t&=\omega \Lambda\begin{pmatrix}
 \psi_y\\\psi_{\pi}
-\end{pmatrix}\mathbb{E}[\eta_{t+1}] + \omega \mathbf{b} \eta_t\\
+\end{pmatrix}\mathbb{E}_t\left[\eta_{t+1}\right] + \omega \mathbf{b} \eta_t\\
 &=\omega \Lambda\begin{pmatrix}
 \psi_y\\\psi_{\pi}
 \end{pmatrix}

@@ -302,7 +302,7 @@ window.Quarto = {
 <div id="prp-price-index" class="theorem proposition">
 <p><span class="theorem-title"><strong>命題 B.1</strong></span> 最終財の価格 <span class="math inline">\(P_t\)</span> は中間財の価格 <span class="math inline">\(P_{j, t}\)</span> を用いて以下のように表される:</p>
 <p><span class="math display">\[
-P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon}\right)^{\frac{1}{1-\varepsilon}}.
+P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \, dj \right)^{\frac{1}{1-\varepsilon}}.
 \]</span></p>
 <p>また, 各中間財の需要 <span class="math inline">\(Y_{j, t}\)</span> は以下のように表される:</p>
 <p><span class="math display">\[
@@ -312,15 +312,15 @@ Y_{j, t} = \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon} Y_t.
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span>最終財の生産者が <span class="math inline">\(Y_t\)</span> 単位の最終財を生産する時の費用最小化問題を考える.</p>
 <p><span class="math display">\[
-\min_{\{Y_{j, t}\}_{j=0}^{1}} \int_{0}^{1} P_{j, t} Y_{j, t} dj \quad \text{s.t.} \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}} = Y_t.
+\min_{\{Y_{j, t}\}_{j=0}^{1}} \int_{0}^{1} P_{j, t} Y_{j, t} \, dj \quad \text{s.t.} \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}} = Y_t.
 \]</span></p>
 <p><span class="math display">\[
-\mathcal{L} = \int_{0}^{1} P_{j, t} Y_{j, t} dj + \lambda_t \left(Y_t - \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}}\right)
+\mathcal{L} = \int_{0}^{1} P_{j, t} Y_{j, t} \, dj + \lambda_t \left(Y_t - \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}}\right)
 \]</span></p>
 <p>FOC:</p>
 <p><span id="eq-foc-ces"><span class="math display">\[
 \begin{aligned}
-P_{j, t} &amp;= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon-1}{\varepsilon}}\right)^{\frac{1}{\varepsilon - 1}}}_{= Y_{t}^{\frac{1}{\varepsilon}}} Y_{j, t}^{-\frac{1}{\varepsilon}} \\
+P_{j, t} &amp;= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon-1}{\varepsilon}} \, dj \right)^{\frac{1}{\varepsilon - 1}}}_{= Y_{t}^{\frac{1}{\varepsilon}}} Y_{j, t}^{-\frac{1}{\varepsilon}} \\
 &amp;= \lambda_t \left(\frac{Y_{j, t}}{Y_t}\right)^{-\frac{1}{\varepsilon}}.
 \end{aligned}
 \tag{B.1}\]</span></span></p>
@@ -328,7 +328,7 @@ P_{j, t} &amp;= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\vareps
 <p><span class="math display">\[
 \int_{j=0}^{1} P_{j, t} Y_{j, t} \,dj = \lambda_t Y_t^{\frac{1}{\varepsilon}} \underbrace{\int_{j=0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj}_{=Y_t^{\frac{\varepsilon-1}{\varepsilon}}} = \lambda_t Y_t
 \]</span></p>
-<p>ここで <span class="math inline">\(\left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \,dj\right)^{\frac{1}{1-\varepsilon}} = \lambda_t Y_t\)</span> という表現を見ると, 左辺は最終財を生産するための費用であることから, <span class="math inline">\(\lambda_t\)</span> は最終財の価格と解釈できることがわかります.</p>
+<p>ここで <span class="math inline">\(\int_{j=0}^{1} P_{j, t} Y_{j, t} \,dj = \lambda_t Y_t\)</span> という表現を見ると, 左辺は最終財を生産するための費用であることから, <span class="math inline">\(\lambda_t\)</span> は最終財の価格と解釈できることがわかります.</p>
 <p>ここで <a href="#eq-foc-ces" class="quarto-xref">式&nbsp;<span>B.1</span></a> の両辺を <span class="math inline">\(1-\varepsilon\)</span> 乗して, <span class="math inline">\(j\)</span> について積分し, <span class="math inline">\(\frac{1}{1-\varepsilon}\)</span> 乗すると</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -379,7 +379,7 @@ RHS &amp;\approx \log \beta + i_t - \pi_{t+1} - \sigma \log C - \sigma \frac{1}{
 \]</span></p>
 <p>これを対数線形化すると,</p>
 <p><span class="math display">\[
-\pi_t= \beta \mathbb{E}[\hat{\pi}_{t+1}] + (1-\beta)\pi +
+\pi_t= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +
 \frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +
 \frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right]
 \]</span></p>
@@ -389,7 +389,7 @@ RHS &amp;\approx \log \beta + i_t - \pi_{t+1} - \sigma \log C - \sigma \frac{1}{
 <p><span class="math display">\[
 LHS = (1-\exp(\log MC_{t}^r))\varepsilon \approx (1-MC^r)\varepsilon - \varepsilon MC^r \widehat{MC^r}_{t}.
 \]</span></p>
-<p><span class="math inline">\(RHS = 1 - RHS_1 + \varphi\beta\mathbb{E}[RHS_2]\)</span> とします.</p>
+<p><span class="math inline">\(RHS = 1 - RHS_1 + \varphi\beta\mathbb{E}_t\left[RHS_2\right]\)</span> とします.</p>
 <p><span class="math display">\[
 \begin{aligned}
 RHS_1 &amp;= \varphi(\exp(\log (1+\pi_t))-1)\exp(\log(1 + \pi_t)) \\
@@ -401,12 +401,12 @@ RHS_2 &amp;= \exp(-\sigma\Delta\hat{C}_{t+1})(\exp(\log (1+\pi_{t+1}))-1)\exp(\l
 <p><span class="math inline">\(LHS = RHS\)</span> であり, 定常状態 <span class="math inline">\((1-MC^r)\varepsilon = 1 - (1-\beta)\varphi\pi(1+\pi)\)</span> を用いると,</p>
 <p><span class="math display">\[
 \begin{aligned}
-\pi_{t} - \pi &amp;= \beta \mathbb{E}[\hat{\pi}_{t+1} - \pi]
+\pi_{t} - \pi &amp;= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1} - \pi\right]
 +\frac{\varepsilon MC^r}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t}
-+\frac{\beta\pi}{\varphi(1 + 2\pi)}\mathbb{E}\left[-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right] \\
-\pi_t&amp;= \beta \mathbb{E}[\hat{\pi}_{t+1}] + (1-\beta)\pi +
++\frac{\beta\pi}{\varphi(1 + 2\pi)}\mathbb{E}_t\left[-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right] \\
+\pi_t&amp;= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +
 \frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +
-\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right].
+\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}_t\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right].
 \end{aligned}
 \]</span></p>
 </div>
@@ -986,7 +986,7 @@ z - b + \beta \mathbb{E}\left[\frac{1-\sigma-\gamma\lambda_w(\theta)}{1-\gamma}J
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>最終財の価格 $P_t$ は中間財の価格 $P_{j, t}$ を用いて以下のように表される:</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon}\right)^{\frac{1}{1-\varepsilon}}.</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \, dj \right)^{\frac{1}{1-\varepsilon}}.</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>また, 各中間財の需要 $Y_{j, t}$ は以下のように表される:</span>
@@ -1002,18 +1002,18 @@ z - b + \beta \mathbb{E}\left[\frac{1-\sigma-\gamma\lambda_w(\theta)}{1-\gamma}J
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>最終財の生産者が $Y_t$ 単位の最終財を生産する時の費用最小化問題を考える.</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>\min_{<span class="sc">\{</span>Y_{j, t}<span class="sc">\}</span>_{j=0}^{1}} \int_{0}^{1} P_{j, t} Y_{j, t} dj \quad \text{s.t.} \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}} = Y_t.</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>\min_{<span class="sc">\{</span>Y_{j, t}<span class="sc">\}</span>_{j=0}^{1}} \int_{0}^{1} P_{j, t} Y_{j, t} \, dj \quad \text{s.t.} \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}} = Y_t.</span>
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>\mathcal{L} = \int_{0}^{1} P_{j, t} Y_{j, t} dj + \lambda_t \left(Y_t - \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}}\right)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>\mathcal{L} = \int_{0}^{1} P_{j, t} Y_{j, t} \, dj + \lambda_t \left(Y_t - \left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj\right)^{\frac{\varepsilon}{\varepsilon - 1}}\right)</span>
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>FOC:</span>
 <span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>P_{j, t} &amp;= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon-1}{\varepsilon}}\right)^{\frac{1}{\varepsilon - 1}}}_{= Y_{t}^{\frac{1}{\varepsilon}}} Y_{j, t}^{-\frac{1}{\varepsilon}} <span class="sc">\\</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>P_{j, t} &amp;= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\varepsilon-1}{\varepsilon}} \, dj \right)^{\frac{1}{\varepsilon - 1}}}_{= Y_{t}^{\frac{1}{\varepsilon}}} Y_{j, t}^{-\frac{1}{\varepsilon}} <span class="sc">\\</span></span>
 <span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>&amp;= \lambda_t \left(\frac{Y_{j, t}}{Y_t}\right)^{-\frac{1}{\varepsilon}}.</span>
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
 <span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>$${#eq-foc-ces}</span>
@@ -1025,7 +1025,7 @@ z - b + \beta \mathbb{E}\left[\frac{1-\sigma-\gamma\lambda_w(\theta)}{1-\gamma}J
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>\int_{j=0}^{1} P_{j, t} Y_{j, t} \,dj = \lambda_t Y_t^{\frac{1}{\varepsilon}} \underbrace{\int_{j=0}^{1} Y_{j, t}^{\frac{\varepsilon - 1}{\varepsilon}} \,dj}_{=Y_t^{\frac{\varepsilon-1}{\varepsilon}}} = \lambda_t Y_t</span>
 <span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>ここで $\left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \,dj\right)^{\frac{1}{1-\varepsilon}} = \lambda_t Y_t$ という表現を見ると, 左辺は最終財を生産するための費用であることから, $\lambda_t$ は最終財の価格と解釈できることがわかります.</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>ここで $\int_{j=0}^{1} P_{j, t} Y_{j, t} \,dj = \lambda_t Y_t$ という表現を見ると, 左辺は最終財を生産するための費用であることから, $\lambda_t$ は最終財の価格と解釈できることがわかります.</span>
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>ここで @eq-foc-ces の両辺を $1-\varepsilon$ 乗して, $j$ について積分し, $\frac{1}{1-\varepsilon}$ 乗すると</span>
 <span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
@@ -1099,7 +1099,7 @@ z - b + \beta \mathbb{E}\left[\frac{1-\sigma-\gamma\lambda_w(\theta)}{1-\gamma}J
 <span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a>これを対数線形化すると,</span>
 <span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>\pi_t= \beta \mathbb{E}<span class="co">[</span><span class="ot">\hat{\pi}_{t+1}</span><span class="co">]</span> + (1-\beta)\pi +</span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>\pi_t= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +</span>
 <span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>\frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +</span>
 <span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a>\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left<span class="co">[</span><span class="ot">\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right</span><span class="co">]</span></span>
 <span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>$$</span>
@@ -1114,7 +1114,7 @@ z - b + \beta \mathbb{E}\left[\frac{1-\sigma-\gamma\lambda_w(\theta)}{1-\gamma}J
 <span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a>LHS = (1-\exp(\log MC_{t}^r))\varepsilon \approx (1-MC^r)\varepsilon - \varepsilon MC^r \widehat{MC^r}_{t}.</span>
 <span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a>$RHS = 1 - RHS_1 + \varphi\beta\mathbb{E}<span class="co">[</span><span class="ot">RHS_2</span><span class="co">]</span>$ とします.</span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a>$RHS = 1 - RHS_1 + \varphi\beta\mathbb{E}_t\left<span class="co">[</span><span class="ot">RHS_2\right</span><span class="co">]</span>$ とします.</span>
 <span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
@@ -1129,12 +1129,12 @@ z - b + \beta \mathbb{E}\left[\frac{1-\sigma-\gamma\lambda_w(\theta)}{1-\gamma}J
 <span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
-<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a>\pi_{t} - \pi &amp;= \beta \mathbb{E}<span class="co">[</span><span class="ot">\hat{\pi}_{t+1} - \pi</span><span class="co">]</span></span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a>\pi_{t} - \pi &amp;= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1} - \pi\right]</span>
 <span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a>+\frac{\varepsilon MC^r}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t}</span>
-<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>+\frac{\beta\pi}{\varphi(1 + 2\pi)}\mathbb{E}\left<span class="co">[</span><span class="ot">-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right</span><span class="co">]</span> <span class="sc">\\</span></span>
-<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>\pi_t&amp;= \beta \mathbb{E}<span class="co">[</span><span class="ot">\hat{\pi}_{t+1}</span><span class="co">]</span> + (1-\beta)\pi +</span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>+\frac{\beta\pi}{\varphi(1 + 2\pi)}\mathbb{E}_t\left[-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right] <span class="sc">\\</span></span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>\pi_t&amp;= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +</span>
 <span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a>\frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +</span>
-<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a>\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left<span class="co">[</span><span class="ot">\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right</span><span class="co">]</span>.</span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a>\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}_t\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right].</span>
 <span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
 <span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a></span>

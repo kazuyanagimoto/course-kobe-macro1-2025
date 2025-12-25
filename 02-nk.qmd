@@ -253,13 +253,13 @@ $$
 中間財企業 $j$ は以下の価値関数を最大化します.
 
 $$
-\max_{\{P_{j, t}\}_{t=0}^{\infty}} \mathbb{E}_{0} \sum_{t=0}^{\infty} D_{t} \left[
+\max_{\{P_{j, t}\}_{t=0}^{\infty}} \mathbb{E}_{0} \sum_{t=0}^{\infty} D_{0, t} \left[
     \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)Y_{j, t} -
     \frac{\varphi}{2}\left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)^2 Y_t
 \right]
 $$
 
-ここで, $D_t := \beta^t \frac{U_{c}(t)}{U_{c}(0)}$ は**確率的割引因子**（stochastic discount factor）です.
+ここで, $D_{0, t} := \beta^t \frac{U_{c}(t)}{U_{c}(0)}$ は**確率的割引因子**（stochastic discount factor）です.
 
 - 企業の所有者は代表的家計であり、企業価値は家計の効用で測定される
 - $U_c(t) = C_t^{-\sigma}$ は $t$ 期の消費の限界効用
@@ -271,6 +271,8 @@ $$
 $$
 V(P_{j, t-1}) = \max_{P_{j, t}} \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)Y_{j, t} - \frac{\varphi}{2}\left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)^2 Y_{t} + \mathbb{E}_{t}[D_{t+1}V(P_{j, t})].
 $$
+
+ここで, $D_{t, t+1}$ を省略して, $D_{t+1} := \beta \frac{U_{c}(t+1)}{U_{c}(t)}$ としました.
 
 **最適価格**
 

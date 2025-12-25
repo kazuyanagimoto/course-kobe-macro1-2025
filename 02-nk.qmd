@@ -100,7 +100,7 @@ New Keynesian モデルの基本的な枠組みはRBCモデルに価格硬直性
 
 $$
 \begin{aligned}
-\widetilde{Y}_t &= \mathbb{E}_t\left[\widetilde{Y}_{t+1}\right] - \frac{1}{\sigma}\left(i_t - r_t^n -\mathbb{E}_t\left[\pi_{t+1}\right]\right) & \text{(NK IS Curve)} \\
+\widetilde{Y}_t &= \mathbb{E}_t\left[\widetilde{Y}_{t+1}\right] - \frac{1}{\sigma}\left(i_t -\mathbb{E}_t\left[\pi_{t+1}\right] - r_t^n\right) & \text{(NK IS Curve)} \\
 \pi_{t} &= \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \kappa \widetilde{Y}_t & \text{(NK Phillips Curve)} \\
 i_t &= r_t + \phi_{\pi}\pi_t + \phi_y \widetilde{Y}_t & \text{(MP Rule)}\\
 \end{aligned}
@@ -394,7 +394,8 @@ $$
 
 $$
 \hat{C}_t = \mathbb{E}_t\left[\hat{C}_{t+1}\right] - \frac{1}{\sigma}\left(i_t - \log \beta - \mathbb{E}_t\left[\pi_{t+1}\right] \right)
-$$
+$${#eq-lin-nkis}
+
 @lem-output-gap より, 産出ギャップは $\widetilde{Y}_t = \hat{Y}_t - \hat{Y}_t^n$ であり, @eq-lin-output-flexible を用いると,
 
 $$
@@ -404,16 +405,21 @@ $$
 Good Market Clearing ($C_t = Y_t$) より, $\hat{C}_t = \hat{Y}_t$ なので,
 
 $$
-\widetilde{Y}_t = \mathbb{E}_t\left[\widetilde{Y}_{t+1}\right] - \frac{1}{\sigma}\left(i_t - r_t^n - \mathbb{E}_t\left[\pi_{t+1}\right]\right)
+\widetilde{Y}_t = \mathbb{E}_t\left[\widetilde{Y}_{t+1}\right] - \frac{1}{\sigma}\left(i_t - \mathbb{E}_t\left[\pi_{t+1}\right] - r_t^n\right)
 $${#eq-nk-is}
 
-ここで, 自然利子率 $r_t^n$ は以下で定義されます.
+なぜなら, 自然利子率は $r_t^n := i_t^n - \mathbb{E}_t\left[\pi_{t+1}^n\right]$ で定義され, @eq-lin-nkis と @eq-lin-output-flexible を用いると,
 
 $$
-r_t^n := -\log \beta + \frac{\sigma(1+\phi)}{\sigma + \phi}\left(\hat{A}_t - \mathbb{E}_t\left[\hat{A}_{t+1}\right]\right).
+r_t^n = -\log \beta + \frac{\sigma(1+\phi)}{\sigma + \phi}\left(\mathbb{E}_t\left[\hat{A}_{t+1}\right] - \hat{A}_t\right).
 $$
 
-定常状態では明らかに $r^n = -\log \beta$ となります.
+と表されるからです. 定常状態では明らかに $r^n = -\log \beta$ となります.
+
+NKIS @eq-nk-is の解釈としては, 産出ギャップが将来の産出ギャップ予想 $\mathbb{E}_t\left[\widetilde{Y}_{t+1}\right]$ と, 実質金利のギャップ $i_t - \mathbb{E}_t\left[\pi_{t+1}\right] - r_t^n$ によって決定されることを示しています.
+
+1. **将来の産出ギャップ予想**: 家計は消費を平滑化しようとするため, 将来の産出ギャップが高いと予想される場合, 現在の産出ギャップも高くなる
+1. **実質金利のギャップ**: 実質金利が高い場合, 貯蓄を増やし現在の消費を減らす. その結果, 産出ギャップが減少する
 
 ### New Keynesian Phillips Curve
 
@@ -453,6 +459,10 @@ $$
 \pi_t = \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \kappa \widetilde{Y}_t.
 $${#eq-nk-pc}
 
+解釈としては, 現在のインフレ率が将来のインフレ予想 $\mathbb{E}_t\left[\pi_{t+1}\right]$ と, 現在の景気状況 $\widetilde{Y}_t$ によって決定されることを示しています.
+
+1. **インフレ予想**: 急激な価格改訂はコストがかかるため, インフレが予想される場合は, 企業は事前に価格を引き上げる
+1. **産出ギャップ**: 需要が高まると, 労働需要が高まり, 賃金が上昇する. 企業はコスト上昇を価格に転嫁し, インフレ率が上昇する
 
 ### Monetary Policy Rule (Taylor Rule)
 
@@ -540,7 +550,7 @@ $$
 \left(\hat{r}_t^n - \eta_t\right).
 $$
 
-ここで, $\omega = (\sigma+\phi_y+\phi_{\pi}\kappa)^{-1}$, $\hat{r}_t^n = r_t^n - r_t^n$ です. Monetary policy shocks は自然利子率に影響を与えないため, $\hat{r}_t^n = 0$ とします.
+ここで, $\omega = (\sigma+\phi_y+\phi_{\pi}\kappa)^{-1}$, $\hat{r}_t^n = r_t^n - r^n$ です. Monetary policy shocks は自然利子率に影響を与えないため, $\hat{r}_t^n = 0$ とします.
 
 このように, 期待演算子を含む線形システムが得られました. これを前方期待 (foward-looking) を含む線形モデルと呼び, このようなモデルを解くには guess-and-verify が有効です.
 

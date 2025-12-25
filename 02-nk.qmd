@@ -279,7 +279,7 @@ $$
 中間財需要 $Y_{j, t} = \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon}Y_t$ を代入すると, ベルマン方程式は以下のようになります.
 
 $$
-V(P_{j, t-1}) = \max_{P_{j, t}} \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)\left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon}Y_t - \frac{\varphi}{2}\left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)^2 \left(\frac{P_{j, t}}{P_{t}}\right)^{-\varepsilon} Y_t + \mathbb{E}_{t}[D_{t+1}V(P_{j, t})].
+V(P_{j, t-1}) = \max_{P_{j, t}} \left(\frac{P_{j, t}}{P_t} - MC_{t}^{r}\right)\left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon}Y_t - \frac{\varphi}{2}\left(\frac{P_{j, t}}{P_{j, t-1}} - 1\right)^2 Y_t + \mathbb{E}_{t}[D_{t+1}V(P_{j, t})].
 $$
 
 最適化条件は以下のようになります.

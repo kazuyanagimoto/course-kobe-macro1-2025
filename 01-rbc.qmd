@@ -65,7 +65,7 @@ Hodrick-Prescott (HP) フィルターは, 時系列データからトレンド�
 ::: callout-note
 ## Hodrick and Prescott Filter
 
-時系列データ　$\{Y\}_{t=0}^T$ に対して, HPフィルターは以下の最適化問題を解くことでトレンド成分 $\{\tau_t\}$ を求める.
+時系列データ $\{Y\}_{t=0}^T$ に対して, HPフィルターは以下の最適化問題を解くことでトレンド成分 $\{\tau_t\}$ を求める.
 
 $$
 \min_{\{\tau_t\}} \sum_{t=1}^{T} \left(Y_t - \tau_t\right)^2 +
@@ -281,7 +281,7 @@ $$
 V_{1}(k, z) = (zF_{1}(k, n) + 1-\delta) U_1(c, 1 - n).
 $$ {#eq-envelope}
 
-ここで, @eq-foc-kprime と　@eq-envelope から,
+ここで, @eq-foc-kprime と @eq-envelope から,
 
 $$
 U_{1}(c, 1 - n) = \beta \mathbb{E}[(z F_{1}(k', n') + 1 - \delta)U_{1}(c', 1 - n') | z].
@@ -295,7 +295,7 @@ $$ {#eq-euler}
 -   @eq-euler は, 消費の限界効用が, 将来の消費の限界効用の期待値と割引率の積に等しいことを示しています
 
 ## Calibration
-
+かね
 ### RBCモデルにおける標準的なパラメータ
 
 RBCモデルの研究では, 以下のパラメータが慣例的に用いられます. その多くを @kydland1982, @prescott1986 または @cooley1995 から引用しています.

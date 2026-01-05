@@ -524,7 +524,7 @@ i_t &= r^n + \phi_{\pi}\pi_t + \phi_y \widetilde{Y}_t + \eta_t \\
 \end{aligned}
 $$
 
-IRFのシミュレーションでは, $t=0$ 時点で $\epsilon_t = 1$　とし, そのあとは $\epsilon_t = 0$ とします. @gali2015 のChapter 3に従い, $\rho_{\eta} = 0.5$, $\sigma_{\eta} = 0.25$ とします.
+IRFのシミュレーションでは, $t=0$ 時点で $\epsilon_t = 1$ とし, そのあとは $\epsilon_t = 0$ とします. @gali2015 のChapter 3に従い, $\rho_{\eta} = 0.5$, $\sigma_{\eta} = 0.25$ とします.
 
 ### IRF from Scratch
 

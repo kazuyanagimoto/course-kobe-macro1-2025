@@ -110,7 +110,7 @@ $$
 $LHS = RHS$ であるので, 
 
 $$
-\hat{C}_t = \mathbb{E}_t[\hat{C}_{t+1}] - \frac{1}{\sigma}\left(i_t - \log \beta - \mathbb{E}_t[\hat{\pi}_{t+1}] \right).
+\hat{C}_t = \mathbb{E}_t[\hat{C}_{t+1}] - \frac{1}{\sigma}\left(i_t + \log \beta - \mathbb{E}_t[\pi_{t+1}] \right).
 $$
 
 :::
@@ -128,7 +128,7 @@ $$
 これを対数線形化すると,
 
 $$
-\pi_t= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +
+\pi_t= \beta \mathbb{E}_t\left[\pi_{t+1}\right] + (1-\beta)\pi +
 \frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +
 \frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right]
 $$
@@ -158,10 +158,20 @@ $LHS = RHS$ であり, 定常状態 $(1-MC^r)\varepsilon = 1 - (1-\beta)\varphi\
 
 $$
 \begin{aligned}
-\pi_{t} - \pi &= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1} - \pi\right]
+-\varepsilon MC^r \widehat{MC^r}_{t} &= -\varphi \left((1+\pi)^2 + \pi(1+\pi)\right)(\pi_t - \pi) \\
+&+\varphi\beta\pi(1+\pi)\mathbb{E}_t\left[-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right] \\
+&+\varphi\beta\left((1+\pi)^2 + (1+\pi)\pi\right)\mathbb{E}_t\left[\pi_{t+1} - \pi\right].
+\end{aligned}
+$$
+
+全体を $\varphi((1+\pi)^2 + \pi(1+\pi)) = \varphi(1+\pi)(1+2\pi)$ で割ると,
+
+$$
+\begin{aligned}
+\pi_{t} - \pi &= \beta \mathbb{E}_t\left[\pi_{t+1} - \pi\right]
 +\frac{\varepsilon MC^r}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t}
 +\frac{\beta\pi}{\varphi(1 + 2\pi)}\mathbb{E}_t\left[-\sigma \Delta \hat{C}_{t+1} + \Delta \hat{Y}_{t+1}\right] \\
-\pi_t&= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +
+\pi_t&= \beta \mathbb{E}_t\left[\pi_{t+1}\right] + (1-\beta)\pi +
 \frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} +
 \frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}_t\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right].
 \end{aligned}

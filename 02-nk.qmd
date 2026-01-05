@@ -393,7 +393,7 @@ $$
 これを対数線形化すると (@prp-lin-nkis), 以下の式を得ます.
 
 $$
-\hat{C}_t = \mathbb{E}_t\left[\hat{C}_{t+1}\right] - \frac{1}{\sigma}\left(i_t - \log \beta - \mathbb{E}_t\left[\pi_{t+1}\right] \right)
+\hat{C}_t = \mathbb{E}_t\left[\hat{C}_{t+1}\right] - \frac{1}{\sigma}\left(i_t + \log \beta - \mathbb{E}_t\left[\pi_{t+1}\right] \right)
 $${#eq-lin-nkis}
 
 @lem-output-gap より, 産出ギャップは $\widetilde{Y}_t = \hat{Y}_t - \hat{Y}_t^n$ であり, @eq-lin-output-flexible を用いると,
@@ -435,7 +435,7 @@ $$
 
 $$
 \begin{aligned}
-\pi_t&= \beta \mathbb{E}_t\left[\hat{\pi}_{t+1}\right] + (1-\beta)\pi +
+\pi_t&= \beta \mathbb{E}_t\left[\pi_{t+1}\right] + (1-\beta)\pi +
 \frac{\varepsilon-1 + (1-\beta)\varphi\pi(1+\pi)}{\varphi(1+\pi)(1+2\pi)}\widehat{MC^r}_{t} \\
 &+\frac{\beta\pi}{\varphi(1+2\pi)}\mathbb{E}_t\left[\Delta \hat{Y}_{t+1} - \sigma \Delta\hat{C}_{t+1}\right]
 \end{aligned}
@@ -444,13 +444,13 @@ $$
 $\pi = 0$ より,
 
 $$
-\hat{\pi}_{t} = \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} \widehat{MC^r}_{t}.
+\pi_{t} = \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} \widehat{MC^r}_{t}.
 $$
 
 @lem-lin-mc を用いて,
 
 $$
-\hat{\pi}_{t} = \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} (\sigma+\phi)\widetilde{Y}_t.
+\pi_{t} = \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \frac{\varepsilon-1}{\varphi} (\sigma+\phi)\widetilde{Y}_t.
 $$
 
 $\kappa = \frac{(\varepsilon-1)(\sigma+\phi)}{\varphi}$ とすると,

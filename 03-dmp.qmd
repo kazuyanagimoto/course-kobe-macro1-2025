@@ -104,7 +104,7 @@ $$
 \lambda_w(\theta_t) = \frac{M(u_t, v_t)}{u_t} = M\left(1, \frac{v_t}{u_t}\right) = M(1, \theta_t).
 $$
 
-これを @eq-ss-unemployment に代入すると,
+この $\theta_t := \frac{v_t}{u_t}$ は労働市場の逼迫性 (labor market tightness) と呼ばれます. 例えば, 労働市場がタイト, $\theta_t$ が大きい場合, 求人が多く失業者が少ないことを意味し, 雇い主は高い賃金を提示して雇用しなければなりません. 逆に, 労働市場が緩和, $\theta_t$ が小さい場合, 求人が少なく失業者が多いことを意味し, 雇い主は低い賃金でも労働者を雇うことができます. これを @eq-ss-unemployment に代入すると,
 
 $$
 \overline{u} = \frac{\sigma}{\lambda_{w}(v / \overline{u}) + \sigma}

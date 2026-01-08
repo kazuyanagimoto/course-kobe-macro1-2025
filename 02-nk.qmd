@@ -183,11 +183,11 @@ $$
 \begin{aligned}
 C_t^{-\sigma} &= \beta (1+i_t) P_t \mathbb{E}_t\left[V'(B_{t})\right] & \text{(FOC of $C_t$)} \\
 N_t^{\phi} &= \beta (1+i_t) W_t \mathbb{E}_t\left[V'(B_{t})\right] & \text{(FOC of $N_t$)}\\
-V'(B_{t-1}) &= \beta (1+i_t)\mathbb{E}_t\left[V'(B_{t})\right] & \text{(EC of $B_t$)}
+V'(B_{t-1}) &= \beta (1+i_t)\mathbb{E}_t\left[V'(B_{t})\right] & \text{(EC of $B_{t-1}$)}
 \end{aligned}
 $$
 
-ここから, $V'(B_{t-1}) = \frac{C_t^{-\sigma}}{P_t}$ より, 
+ここから, $V'(B_{t-1}) = \frac{C_t^{-\sigma}}{P_t}$ が導けます. これを用いて,
 
 $$
 \begin{aligned}

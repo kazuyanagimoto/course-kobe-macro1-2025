@@ -528,7 +528,7 @@ IRFのシミュレーションでは, $t=0$ 時点で $\epsilon_t = 1$ とし, �
 
 ### IRF from Scratch
 
-@eq-nk-is, @eq-nk-pc, @eq-taylor-rule を整理すると以下を得ます.
+@lem-nk-system より,
 
 $$
 \begin{pmatrix}
@@ -568,14 +568,14 @@ $$
 \psi_y\\\psi_{\pi}
 \end{pmatrix}\eta_t&=\omega \Lambda\begin{pmatrix}
 \psi_y\\\psi_{\pi}
-\end{pmatrix}\mathbb{E}_t\left[\eta_{t+1}\right] + \omega \mathbf{b} \eta_t\\
+\end{pmatrix}\mathbb{E}_t\left[\eta_{t+1}\right] - \omega \mathbf{b} \eta_t\\
 &=\omega \Lambda\begin{pmatrix}
 \psi_y\\\psi_{\pi}
 \end{pmatrix}
-\rho_{\eta}\eta_t + \omega \mathbf{b} \eta_t\\
+\rho_{\eta}\eta_t - \omega \mathbf{b} \eta_t\\
 \begin{pmatrix}
 \psi_y\\\psi_{\pi}
-\end{pmatrix}&=(I - \omega\rho_{\eta}\Lambda)^{-1} \omega \mathbf{b}.
+\end{pmatrix}&=(I - \omega\rho_{\eta}\Lambda)^{-1} (-\omega \mathbf{b}).
 \end{aligned}
 $$
 

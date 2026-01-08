@@ -8,9 +8,9 @@ engine: julia
 
 ## New Keynesian Model
 
-###  CES生産関数における価格指数
-
 ::: {#prp-price-index}
+
+## CES生産関数における価格指数
 
 最終財の価格 $P_t$ は中間財の価格 $P_{j, t}$ を用いて以下のように表される:
 
@@ -73,10 +73,6 @@ Y_{j, t} = \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon} Y_t.
 $$
 
 :::
-
-### 対数線形化
-
-ここでは $\hat{x}_t := \log x_t - \log x$ とします. また, $\log (1 + x_t) \approx x_t$ という近似を用います.
 
 ::: {#prp-lin-nkis}
 
@@ -249,11 +245,81 @@ $$
 
 :::
 
+::: {#lem-nk-system}
+
+## IS-MP-PCの行列表現
+
+@eq-nk-is, @eq-nk-pc, @eq-taylor-rule を整理すると以下を得る.
+
+$$
+\begin{pmatrix}
+\widetilde{Y}_t \\
+\pi_t
+\end{pmatrix}
+=\omega\underbrace{\begin{pmatrix}
+\sigma & 1-\beta\phi_{\pi} \\
+\sigma\kappa & \kappa+\beta(\sigma+\phi_y)
+\end{pmatrix}}_{\Lambda}
+\begin{pmatrix}
+\mathbb{E}_t\left[\widetilde{Y}_{t+1}\right] \\
+\mathbb{E}_t\left[\pi_{t+1}\right]
+\end{pmatrix}
++\omega\underbrace{\begin{pmatrix}
+1\\
+\kappa
+\end{pmatrix}}_{\mathbf{b}}
+\left(\hat{r}_t^n - \eta_t\right).
+$$
+
+ここで, $\omega := (\sigma + \phi_y + \phi_{\pi}\kappa)^{-1}$, $\hat{r}_t^n := r_t^n - r^n$ である.
+
+:::
+
+::: {.proof}
+
+@eq-nk-is を $\sigma$ 倍し, @eq-taylor-rule を代入すると,
+
+$$
+\sigma\tilde{Y}_t = \sigma\mathbb{E}_t[\tilde{Y}_{t+1}] - \phi_{\pi} \pi_t - \phi_y \tilde{Y}_t - \eta_t + \mathbb{E}_t\left[\pi_{t+1}\right] + \underbrace{r_t^n - r^n}_{=: \hat{r}_t^n}.
+$$
+
+@eq-nk-pc を代入すると,
+
+$$
+\sigma\tilde{Y}_t = \sigma\mathbb{E}_t[\tilde{Y}_{t+1}] - \phi_{\pi} \kappa\mathbb{E}_t\left[\pi_{t+1}\right] - \phi_{\pi}\kappa\tilde{Y}_t - \phi_y \tilde{Y}_t - \eta_t + \mathbb{E}_t\left[\pi_{t+1}\right].
+$$
+
+よって, $\omega := (\sigma + \phi_y + \phi_{\pi}\kappa)^{-1}$ を用いて,
+
+$$
+\widetilde{Y}_t = \omega\sigma \mathbb{E}\left[\tilde{Y}_{t+1}\right] + \omega(1-\beta\phi_{\pi})\mathbb{E}_t\left[\pi_{t+1}\right] + \omega\left(\hat{r}_t^n - \eta_t\right).
+$$
+
+これを @eq-nk-pc に代入すると,
+
+$$
+\begin{aligned}
+\pi_t &= \beta \mathbb{E}_t\left[\pi_{t+1}\right] + \omega \sigma \kappa \mathbb{E}_t\left[\tilde{Y}_{t+1}\right] + \kappa \omega (1-\beta\phi_{\pi})\mathbb{E}_t\left[\pi_{t+1}\right] + \kappa \omega \left(\hat{r}_t^n - \eta_t\right) \\
+&= \omega \sigma \kappa \mathbb{E}_t\left[\tilde{Y}_{t+1}\right] + \left(\beta + \kappa \omega(1-\beta\phi_{\pi})\right)\mathbb{E}_t[\pi_{t+1}] + \omega\kappa\left(\hat{r}_t^n - \eta_t\right).
+\end{aligned}
+$$
+
+ここで, 次の式が成り立つので命題は証明された.
+
+$$
+\begin{aligned}
+\beta + \kappa\omega(1-\beta\phi_{\pi}) &= \omega\kappa + \omega\beta(\omega^{-1} - \phi_{\pi}\kappa) \\
+&= \omega\kappa + \omega\beta(\sigma + \phi_y).
+\end{aligned}
+$$
+
+:::
+
 ## DMP Framework
 
-### 均衡条件
-
 ::: {#prp-dmp-eq}
+
+## Job Creation Condition
 
 @eq-bellman-firm, @eq-free-entry, @eq-bellman-worker, @eq-foc-nb より, 次の式を得る.
 

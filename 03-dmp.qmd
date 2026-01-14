@@ -243,7 +243,7 @@ $${#eq-job-creation}
 導出は @prp-dmp-eq を参照してください. ここで定常状態を考えると,
 
 $$
-\frac{\kappa}{(1-\gamma)\lambda_{f}(\overline{\theta})} = \beta \mathbb{E}\left[\overline{z} - b + \frac{1-\sigma-\gamma\lambda_w(\overline{\theta})}{1-\gamma}\frac{\kappa}{\lambda_{f}(\overline{\theta})}\right].
+\frac{\kappa}{(1-\gamma)\lambda_{f}(\overline{\theta})} = \beta \left(\overline{z} - b + \frac{1-\sigma-\gamma\lambda_w(\overline{\theta})}{1-\gamma}\frac{\kappa}{\lambda_{f}(\overline{\theta})}\right).
 $${#eq-ss-jc}
 
 @eq-ss-jc は定常状態の $\overline{\theta} = \frac{\overline{v}}{\overline{u}}$ を定める式とみなすことができます. したがって, 均衡における求人 $v$ と失業率 $u$ の関係は, @eq-beveridge-curve (BC) と @eq-ss-jc (JC) の交点によって決定されます.
@@ -303,6 +303,13 @@ Parameter values for the DMP model
 
 - モデルの一期間は１ヶ月とする (@hagedorn2008 では1週間)
 - RBCモデルで標準的な1年の割引率 $\beta = 0.947$ [@cooley1995] を1ヶ月に直すと $0.947^{\frac{1}{12}} = 0.996$
+- 定常状態において $\overline{z} = 1, \overline{\theta} = 1$ とする
+- $\kappa$ の値は定常状態 @eq-ss-jc を用いて次のように計算される
+
+$$
+\kappa = \frac{(1-\gamma) \lambda_{f}(\overline{\theta}) \beta (\overline{z} - b)}{1 - \beta (1 - \sigma - \gamma \lambda_{w}(\overline{\theta}))}.
+$$
+
 
 ## Simulation
 
@@ -332,8 +339,6 @@ end
     z̄ = 1.0
     θ̄ = 1.0
     λ̄_w = χ * θ̄^(1 - η)
-    λ̄_f = χ * θ̄^(-η)
-    ū = σ / (λ̄_w + σ)
     κ = (1 - γ) * λ̄_w * β * (z̄ - b) / (1 - β * (1 - σ - γ * λ̄_w))
 end
 ```
@@ -413,3 +418,237 @@ pretty_table(df_mdl, backend=:markdown, allow_markdown_in_cells=true,
 
 @tbl-dmp-stats はシミュレーションの結果を示しています. @tbl-dmp-table2 と比較すると, 各パラメータの相関はおおむね一致しています. しかし, $u, v, \theta = v/u$ の標準偏差が実際のデータよりも小さくなっていることがわかります. この点は, DMPモデルの重要な課題の一つとして知られており, "Labor Market Volatility Puzzle", あるいは Shimer Puzzle [@shimer2005] と呼ばれます.
 
+## RBC meets DMP
+
+ここからは, RBCモデルにDMPフレームワークを組み込んだモデルを考えます. 次の3つが大きな違いです.
+
+1. 凹型の効用関数
+1. 生産関数に資本を導入
+1. 企業の利潤を所有者に帰属^[今までは企業はこの経済の外部から所有されていると暗に仮定していました.]
+
+### 設定
+
+- 消費者は $(i, j) \in [0, 1]^2$ のユニットスクエアに分布している
+- $i$ は家族を表し, $j$ は家族内の個人を表す. 家族のメンバーは同一であると考える
+- 家族 $i$ は互いに同一であると考える. したがって, 代表的家族 (representative family) を考えることができる
+- 家族内の所得はプールされ, 消費は均等に分配されると考える. したがって, 世帯主 (household head) の効用を最大化することを考える
+
+**家計**
+
+代表的家計の世帯主の問題を考えるため, $i, j$ を省略します.
+
+$$
+\max_{\{c_t\}} \mathbb{E}_0 \sum_{t=0}^{\infty} \beta^t \mathcal{U}(c_t)
+$$
+
+subject to
+
+$$
+c_t + k_{t+1} = (1+r_t - \delta) k_t + (1-u_t) w_t + u_t b + d_t
+$$
+
+- $u_t$: 失業率. 家族の中にいる失業者の割合
+- $b$: 失業給付 (unemployment benefit) または home production
+- $d_t$: 企業からの配当 (dividend)
+
+**企業**
+
+代表的企業の生産関数は次のコブ・ダグラス型とします.
+
+$$
+Y_t = z_t K_t^{1-\alpha} N_t^{\alpha}.
+$$
+
+なお, 労働投入量は雇用数と一致するため $N_t = 1 - u_t$ です. ここで, 労働者一人あたりの資本投入量を $k_{f, t} := \frac{K_t}{1-u_t}$ とすると, 企業の最適資本量選択問題は次のように表されます.
+
+$$
+\max_{k_{f, t}} z_t k_{f, t}^{\alpha} - r_t k_{f, t}
+$$
+
+一階条件より $r_t = \alpha z_t k_{f, t}^{\alpha - 1}$ となり, 均衡における資本価格は次のように表されます.
+
+$$
+r(z_t, K_t, u_t) = \alpha z_t \left(\frac{K_t}{1-u_t}\right)^{\alpha - 1}.
+$$
+
+ここで, 状態変数を $X_t := (z_t, K_t, u_t)$ と定義し, マッチごとの企業余剰を $y(X_t)$ と表すと,
+
+$$
+\begin{aligned}
+y(X_t) &= z_t \left(\frac{K_t}{1-u_t}\right)^{\alpha} - r(X_t) \frac{K_t}{1-u_t} \\
+&= (1-\alpha) z_t \left(\frac{K_t}{1-u_t}\right)^{\alpha}.
+\end{aligned}
+$$
+
+
+### ベルマン方程式
+
+**家計**
+
+$$
+\mathcal{V}(k, X) = \max_{c, k'} \mathcal{U}(c) + \beta \mathbb{E}\left[\mathcal{V}(k', X') | z\right]
+$$
+
+subject to
+
+$$
+\begin{aligned}
+c + k' &= (1 + r(X) - \delta) k + (1-u) w(X) + u b + d(X), \\
+K' &= \Omega(X), \\
+u' &= (1 - \lambda_w(\theta(X))) + \sigma (1 - u).
+\end{aligned}
+$$
+
+ここで $\Omega(X)$ は資本蓄積の法則 (Law of motion of capital) を表します. また, $w(X), d(X)$ はそれぞれ均衡賃金と企業の配当を表します. ここから, 状態価格 (state price) が導けます.
+
+$$
+Q(z', X) = \beta f(z' | z) \frac{\mathcal{U}_c(C(z', \Omega(X), u'(X)))}{\mathcal{U}_c(C(X))}
+$$
+
+ここで, $f(z' | z)$ は状態 $z$ から次期の状態 $z'$ への遷移確率密度関数を表します. $Q(z', X)$ の解釈としては
+
+- 次の期に $z'$ が実現した時に, 1単位の消費をもらえる保険 (Arrow security) の価格
+- 各状態 $z'$ に対する確率的割引因子
+
+この状態価格を導入すると, 労働者や企業の価値関数が $Q(z', X)$ を用いた形でかけます. それぞれの導出は @azzimonti2025 の Chapter 20 とその付録を参照してください.
+
+
+**労働者**
+
+家族にとって, 家族のメンバー (労働者) は, 確率的に雇用状態の変化する所得の過程とみなすことができます. したがって, 労働者の価値関数は $Q(z', X)$ を用いて次のように表されます.
+
+$$
+\begin{aligned}
+W(X) &= w(X) + \int Q(z', X)\left((1-\sigma)W(X') + \sigma U(X')\right)\, dz' \\
+U(X) &= b + \int Q(z', X)\left(\lambda_w(\theta(X))W(X') + (1-\lambda_w(\theta(X)))U(X')\right)\, dz'
+\end{aligned}
+$${#eq-bellman-worker-dmp-rbc}
+
+導出の詳細は @azzimonti2025 の付録20.A.6 を参照してください.
+
+**企業**
+
+企業の価値関数も同様にして次のように表されます.
+
+$$
+\begin{aligned}
+J(X) &= y(X) - w(X) + \int Q(z', X)\left((1-\sigma)J(X') + \sigma V(X')\right)\, dz' \\
+V(X) &= -\kappa + \int Q(z', X)\left((1-\lambda_f(\theta(X)))V(X') + \lambda_f(\theta(X)) J(X')\right)\, dz'
+\end{aligned}
+$${#eq-bellman-firm-dmp-rbc}
+
+導出の詳細は @azzimonti2025 の付録20.A.6 を参照してください. また, Free entry condition $V(X) = 0$ から,
+
+$$
+\frac{\kappa}{\lambda_f(\theta(X))} = \int Q(z', X) J(X')\, dz'.
+$${#eq-free-entry-dmp-rbc}
+
+### Equilibrium Conditions
+
+**Job Creation Condition**
+
+@eq-bellman-worker-dmp-rbc, @eq-bellman-firm-dmp-rbc, @eq-free-entry-dmp-rbc から, @prp-dmp-eq と同様にして, Job Creation Condition が導出されます.
+
+$$
+\frac{\kappa}{(1-\gamma)\lambda_{f}(\theta(X))} = \int Q(z', X) \left[y(X') - b + \frac{1-\sigma-\gamma\lambda_w(\theta(X'))}{1-\gamma}\frac{\kappa}{\lambda_{f}(\theta(X'))}\right]\, dz'.
+$${#eq-job-creation-dmp-rbc}
+
+**Euler Equation**
+
+標準的なRBCモデルであるため, 家計の最適化条件から Euler Equation が導出されます.
+
+$$
+1 = \int Q(z', X) (1 + r(X') - \delta)\, dz'.
+$$
+
+**Resource Constraint**
+
+$$
+K' = (1 - \delta) K + Y - C - \kappa v
+$$
+
+- Vacancy cost $\kappa v$ は財で支払われると仮定
+- 人口が1であるため, 総消費 $C$ は一人当たり消費 $c$ と一致
+
+### Calibration
+
+@tbl-dmp-params に加えて, 以下のパラメータを設定します.
+
+::: {#tbl-dmp-params-rbc tbl-colwidths="[20, 15, 40]"}
+
+|          **Parameter** | **Value** |    **Source** |
+|:----------------------:|----------:|--------------:|
+|                $\beta$ |     0.996 |   @cooley1995 |
+|               $\alpha$ |     0.4   |   @cooley1995 |
+|               $\delta$ |     0.004 |   @cooley1995 |
+
+Parameter values for the RBC+DMP model
+
+:::
+
+また, 効用関数は $\mathcal{U}(c) = \log (c)$ とします. 元々のDMPモデルと一つ異なるのは, 失業給付 $b$ の値を $y(X)$ の定常状態の値 $\overline{y}$ の40% であると定める点です.
+
+### Simulation
+
+```{julia}
+#| label: mdl-dmp-rbc
+#| code-fold: show
+#| output: false
+@model RBC_DMP begin
+    # Matching
+    λ_f[0] = χ * θ[0]^(-η)
+    λ_w[0] = χ * θ[0]^(1 - η)
+    u[0] = (1 - λ_w[-1]) * u[-1] + σ * (1 - u[-1])
+    v[0] = θ[0] * u[0]
+
+    # Firm side
+    k_f[0] = K[0] / (1 - u[0])
+    r[0] = α * z[0] * k_f[0]^(α - 1)
+    y[0] = (1 - α) * z[0] * k_f[0]^α
+    Y[0] = z[0] * K[0]^α * (1 - u[0])^(1 - α)
+
+    # Euler equation
+    Q[0] = β * C[0] / C[1]
+    1 = Q[0] * (1 + r[1] - δ)
+
+    # Job creation condition
+    κ / ((1 - γ) * λ_f[0]) = Q[0] * (y[1] - b + (1 - σ - γ * λ_w[1]) / (1 - γ) * (κ / λ_f[1]))
+
+    # Resource constraint
+    K[1] = (1 - δ) * K[0] + Y[0] - C[0] - κ * v[0]
+
+    # Productivity shock
+    log(z[0]) - log(z̄) = ρ * (log(z[-1]) - log(z̄)) + σ_ε * ε[x]
+end
+
+@parameters RBC_DMP begin
+    # RBC parameters
+    β = 0.996
+    α = 0.4
+    δ = 0.004
+    # DMP parameters
+    ρ = 0.949
+    σ_ε = 0.0065
+    σ = 0.034
+    χ = 0.45
+    γ = 0.72
+    η = 0.72
+    # Steady state values
+    z̄ = 1.0
+    θ̄ = 1.0
+    λ̄_w = χ * θ̄^(1 - η)
+    λ̄_f = χ * θ̄^(-η)
+    r̄ = 1 / β - 1 + δ
+    k̄_f = (r̄ / (α * z̄))^(1 / (α - 1))
+    ȳ = (1 - α) * z̄ * k̄_f^α
+    # Calibration of b and κ
+    b = 0.4 * ȳ
+    κ = λ̄_f * (β * (1 - γ) * (ȳ - b)) / (1 - β * (1 - σ - γ * λ̄_w))
+end
+```
+
+```{julia}
+#| label: irf-dmp-rbc
+#| code-fold: true
+plot_irf(RBC_DMP; periods=100, variables=[:z, :Y, :C, :u, :θ, :v]);
+```

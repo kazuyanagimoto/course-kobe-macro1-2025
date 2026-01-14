@@ -161,7 +161,7 @@ $$
 $$
 \begin{aligned}
 J(z) &= z - w(z) + \beta \mathbb{E}\left[(1-\sigma)J(z') + \sigma V(z') \mid z\right] \\
-V(z) &= -\kappa + \beta \mathbb{E}\left[\lambda_f(\theta)V(z') + (1-\lambda_f(\theta)) J(z') \mid z\right].
+V(z) &= -\kappa + \beta \mathbb{E}\left[(1-\lambda_f(\theta))V(z') + \lambda_f(\theta) J(z') \mid z\right].
 \end{aligned}
 $${#eq-bellman-firm}
 
@@ -203,15 +203,15 @@ $${#eq-bellman-worker}
 - 一般ナッシュ交渉を仮定する
 
 $$
-\max_{w} \left(\tilde{W}(w, z) - U(z)\right)^{\gamma}\left(\tilde{J}(w, z) - V(z)\right)^{1-\gamma}.
+\max_{w} \left(\widetilde{W}(w, z) - U(z)\right)^{\gamma}\left(\widetilde{J}(w, z) - V(z)\right)^{1-\gamma}.
 $$
 
-ここで, $\tilde{W}(w, z)$, $\tilde{J}(w, z)$ は今期の賃金が $w$ の時の労働者と企業の価値関数を表します. そのため, 今までの表現 $W(z), J(z)$ は, 均衡賃金 $w(z)$ をすでに考慮した書き方になっていたということです.
+ここで, $\widetilde{W}(w, z)$, $\widetilde{J}(w, z)$ は今期の賃金が $w$ の時の労働者と企業の価値関数を表します. そのため, 今までの表現 $W(z), J(z)$ は, 均衡賃金 $w(z)$ をすでに考慮した書き方になっていたということです.
 
 ここで, 一階条件をとると
 
 $$
-(1-\gamma)\left(\tilde{W}(w, z) - U(z)\right) = \gamma \left(\tilde{J}(w, z) - V(z)\right).
+(1-\gamma)\left(\widetilde{W}(w, z) - U(z)\right) = \gamma \left(\widetilde{J}(w, z) - V(z)\right).
 $${#eq-foc-nb}
 
 $U(z)$, $V(z)$ は労働者と企業からみた交渉決裂点 (disagreement point, outside option) であり, それと比べた場合の余剰 (surplus) を交渉力 $\gamma$, $1 - \gamma$ で重み付けて均等化しているということがわかります. もう一つの解釈は, 均衡における総余剰 $\mathcal{S}$ を以下のように定義した時,

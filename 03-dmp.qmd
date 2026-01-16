@@ -319,7 +319,7 @@ $$
 #| output: false
 @model DMP begin
     κ / ((1 - γ) * λ_f[0]) =
-        β * (z[0] - b + (1 - σ - γ * λ_w[1]) / (1 - γ) * (κ / λ_f[1]))
+        β * (z[1] - b + (1 - σ - γ * λ_w[1]) / (1 - γ) * (κ / λ_f[1]))
     λ_f[0] = χ * θ[0]^(-η)
     λ_w[0] = χ * θ[0]^(1 - η)
     u[0] = (1 - λ_w[-1]) * u[-1] + σ * (1 - u[-1])
@@ -358,12 +358,12 @@ plot_irf(DMP, variables=[:u, :v, :z, :θ], periods=100);
 #| tbl-cap: Model Statistics
 #| tbl-colwidths: [25, 5, 10, 10, 10, 10]
 #| output: asis
-function sim_one(; burnin, periods, mdl=DMP)
+function sim_one(; burnin, periods, mdl)
     sim = get_simulation(mdl, variables=[:u, :v, :z, :θ], periods=periods + burnin, levels=true)
-    us = sim[1, burnin+1:end]
-    vs = sim[2, burnin+1:end]
-    zs = sim[3, burnin+1:end]
-    θs = sim[4, burnin+1:end]
+    us = sim(:u, burnin+1:burnin+periods, :simulate)
+    vs = sim(:v, burnin+1:burnin+periods, :simulate)
+    zs = sim(:z, burnin+1:burnin+periods, :simulate)
+    θs = sim(:θ, burnin+1:burnin+periods, :simulate)
 
     xs_quarterly = [[mean(xs[i:i+2]) for i in 1:3:length(xs)-3] for xs in (us, vs, θs, zs)]
     cycles = [hp_filter(log.(xs), 1600)[1] for xs in xs_quarterly]
@@ -381,10 +381,10 @@ function sim_one(; burnin, periods, mdl=DMP)
         value=vcat(std_mdl, acor_mdl, cor_mdl))
 end
 
-function get_table(; n_sim=1000, burnin=100, periods=648)
-    df = sim_one(burnin=burnin, periods=periods)
+function get_table(; n_sim=1000, burnin=100, periods=648, mdl=DMP)
+    df = sim_one(burnin=burnin, periods=periods, mdl=mdl)
     for i in 2:n_sim
-        df_i = sim_one(burnin=burnin, periods=periods)
+        df_i = sim_one(burnin=burnin, periods=periods, mdl=mdl)
         df = vcat(df, df_i)
     end
 
@@ -570,6 +570,8 @@ $$
 - Vacancy cost $\kappa v$ は財で支払われると仮定
 - 人口が1であるため, 総消費 $C$ は一人当たり消費 $c$ と一致
 
+<!-- The result does not match the ones in Azzimonti et al. (2025)
+
 ### Calibration
 
 @tbl-dmp-params に加えて, 以下のパラメータを設定します.
@@ -600,22 +602,23 @@ Parameter values for the RBC+DMP model
     λ_w[0] = χ * θ[0]^(1 - η)
     u[0] = (1 - λ_w[-1]) * u[-1] + σ * (1 - u[-1])
     v[0] = θ[0] * u[0]
+    N[0] = 1 - u[0]
 
     # Firm side
-    k_f[0] = K[0] / (1 - u[0])
+    k_f[0] = K[0] / N[0]
     r[0] = α * z[0] * k_f[0]^(α - 1)
     y[0] = (1 - α) * z[0] * k_f[0]^α
-    Y[0] = z[0] * K[0]^α * (1 - u[0])^(1 - α)
+    Y[0] = z[0] * K[0]^α * N[0]^(1 - α)
 
     # Euler equation
-    Q[0] = β * C[0] / C[1]
-    1 = Q[0] * (1 + r[1] - δ)
+    1 = β * (C[0] / C[1]) * (1 + r[1] - δ)
 
     # Job creation condition
-    κ / ((1 - γ) * λ_f[0]) = Q[0] * (y[1] - b + (1 - σ - γ * λ_w[1]) / (1 - γ) * (κ / λ_f[1]))
+    κ / ((1 - γ) * λ_f[0]) = β * (C[0] / C[1]) * (y[1] - b + (1 - σ - γ * λ_w[1]) / (1 - γ) * (κ / λ_f[1]))
 
     # Resource constraint
-    K[1] = (1 - δ) * K[0] + Y[0] - C[0] - κ * v[0]
+    I[0] = K[0] - (1 - δ) * K[-1]
+    Y[0] = C[0] + I[0] + κ * v[0]
 
     # Productivity shock
     log(z[0]) - log(z̄) = ρ * (log(z[-1]) - log(z̄)) + σ_ε * ε[x]
@@ -650,5 +653,28 @@ end
 ```{julia}
 #| label: irf-dmp-rbc
 #| code-fold: true
-plot_irf(RBC_DMP; periods=100, variables=[:z, :Y, :C, :u, :θ, :v]);
+plot_irf(RBC_DMP; periods=200, variables=[:z, :u, :θ, :v]);
 ```
+
+```{julia}
+plot_irf(RBC_DMP; periods=200, variables=[:N, :Y, :C, :I]);
+```
+
+```{julia}
+#| label: tbl-dmp-rbc-stats
+#| code-fold: true
+#| tbl-cap: "Model Statistics for RBC+DMP Model: Labor Market"
+#| tbl-colwidths: [25, 5, 10, 10, 10, 10]
+#| output: asis
+df_mdl = get_table(mdl=RBC_DMP)
+pretty_table(df_mdl, backend=:markdown, allow_markdown_in_cells=true,
+    alignment=[:l, :c, :r, :r, :r, :r],
+    column_labels=["", "", "\$u\$", "\$v\$", "\$v/u\$", "\$z\$"],
+    formatters=[
+        (v, i, j) -> ismissing(v) ? "" : v,
+        (v, i, j) -> v isa Number ? @sprintf("%.3f", v) : v
+    ]
+)
+```
+
+-->

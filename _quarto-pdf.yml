@@ -15,6 +15,7 @@ book:
     - 11-linearization.qmd
     - 12-proofs.qmd
     - 13-foundation.qmd
+    - 14-dp.qmd
     - references.qmd
 
 format:

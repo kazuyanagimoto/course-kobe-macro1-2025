@@ -2,7 +2,7 @@
 engine: julia
 ---
 
-# Real Business Cycle Model
+# Real Business Cycle Model {#sec-rbc}
 
 ```{julia}
 #| label: setup-rbc

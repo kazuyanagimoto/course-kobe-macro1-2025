@@ -1,0 +1,625 @@
+---
+engine: julia
+---
+
+# Dynamic Programming
+
+```{julia}
+#| label: setup-nonlinear
+#| output: false
+#| code-fold: true
+using Plots
+using LaTeXStrings
+using Distributions
+import Random
+using Roots
+using LinearAlgebra
+using Interpolations
+using QuantEcon
+using BenchmarkTools
+
+mypalette = ["#d5968c", "#c2676d", "#5c363a", "#995041", "#45939c", "#0f6a81"]
+default(size=(500, 309), titlefontsize=10, fmt=:svg, grid=false,
+    foreground_color_legend=nothing, palette=mypalette[[6, 2, 4, 3, 1, 5]])
+```
+
+## Introduction
+
+この章では, 動的計画法 (Dynamic Programming) による非線形モデルの数値解法について学びます.　次のベルマン方程式を解くことを考えます.
+
+$$
+V(k, z) = \max_{k'} U\left(zf(k) + (1-\delta)k - k', 1-n\right) + \beta \mathbb{E}[V(k', z') | z].
+$$
+
+subject to
+
+$$
+c + k' = zf(k) + (1-\delta)k.
+$$
+
+ここで, モデルを「解く」とは, 価値関数 $V(k, z)$ や政策関数 $c = g_c(k, z)$, $k' = g_k(k, z)$, を数値的に求めることを意味します. つまり, 次のステップを踏みます.
+
+1. グリッドの離散化: $k = k_1, k_2, \dots, k_I$, $z = z_1, z_2, \dots, z_J$
+1. 価値関数の計算: 各 $(k_i, z_j)$ に対して $V(k_i, z_j)$ を計算
+1. 政策関数の計算: 各 $(k_i, z_j)$ に対して $c = g_c(k_i, z_j)$ , $k' = g_k(k_i, z_j)$, を計算
+
+いきなり確率過程を考えるのは難しいので, まずは確定的な場合から始めます.
+
+## Deterministic Case
+
+確定的な場合の次のベルマン方程式を考えます.
+
+$$
+V(k) = \max_{k'} \left\{u(f(k) + (1-\delta)k - k') + \beta V(k')\right\}.
+$$
+
+この問題を数値的に解く方法には, 大きく分けて2つの方法があります.
+
+1. **Value Function Iteration**
+    - ベルマン方程式の不動点を直接求める方法
+    - 収束性が保証されているが, 収束速度は比較的遅い
+2. **Policy Function Iteration**
+    - オイラー方程式の不動点を求める方法
+    - 収束性は保証されていないが, 収束速度は比較的速い
+
+数値計算に用いるために, 以下の関数形とパラメータを仮定します.
+
+- $u(c) = \log c$
+- $f(k) = k^\alpha$
+- $\beta = 0.96$
+- $\delta = 0.1$
+- $\alpha = 0.36$
+
+```{julia}
+#| label: model-deterministic
+#| code-fold: show
+#| output: false
+@kwdef struct DeterministicModel{TF<:AbstractFloat,TI<:Integer}
+    # Parameters
+    α::TF = 0.36
+    β::TF = 0.96
+    δ::TF = 0.1
+
+    # Value Function
+    n_k::TI = 101
+    k_min::TF = 0.5
+    k_max::TF = 10.0
+    k_grid::Vector{TF} = collect(range(k_min, k_max, length=n_k))
+    V::Vector{TF} = zeros(n_k)
+    gc::Vector{TF} = zeros(n_k)
+    gk::Vector{TF} = zeros(n_k)
+end
+
+u(c) = log(max(c, 1e-9)) # consumption cannot be negative
+u′(c) = 1 / c
+f(k; m::DeterministicModel) = k^m.α
+f′(k; m::DeterministicModel) = m.α * k^(m.α - 1)
+```
+
+### Value Function Iteration
+
+::: {.callout-note}
+
+## Value Function Iteration
+
+1. $k$ の定義域を $[k_{\min}, k_{\max}]$ を $n$ 個のグリッドポイントに分割する.
+1. $V(k)$ の初期値 $V^0$ を適当に設定する. つまり, $V^0 = (V_0^0, V_1^0, \dots, V_n^0)$ に適当な値を設定する.
+1. $V^0$ をベルマン方程式の右辺に代入し, 各 $k_i$ に対して $V_i^1$ を計算する.
+    - $k_i$ に対する最適な $k'$ を求めるために, グリッドポイント全てを試し, 最大化を行う.
+1. 2-3を繰り返す. 収束条件は以下のように設定する.
+    - $|V^N - V^{N-1}| < \varepsilon$
+    - $|V^N - V^{N-1}|$ はベクトルのノルム
+    - $\varepsilon$ は十分小さな値を設定する. 例えば, $\epsilon = 10^{-6}$ とする
+
+:::
+
+このアルゴリズムは, 縮小写像定理 (Contraction Mapping Theorem) に基づいており, 収束が保証されています. 詳しくは @stokey1989 の第3章を参照してください. また, このような収束の閾値 $\varepsilon$ を tolerance と呼ぶことがあります.
+
+```{julia}
+#| label: value-function-iteration
+#| code-fold: show
+#| output: false
+function vfi!(m::DeterministicModel; tol=1e-6, max_iter=1000, verbose=true)
+    (; k_grid, β, δ) = m
+
+    iter, dist = 0, Inf
+    V_new = similar(m.V)
+    gk_new = similar(m.gk)
+    gc_new = similar(m.gc)
+    while dist > tol && iter < max_iter
+        for (i_k, k) in enumerate(k_grid)
+            val_opt = -Inf
+            i_k′_opt = 0
+            for (i_k′, k′) in enumerate(k_grid)
+                val = u(f(k; m) + (1 - δ) * k - k′) + β * m.V[i_k′]
+                if val > val_opt
+                    val_opt = val
+                    i_k′_opt = i_k′
+                end
+            end
+            V_new[i_k] = val_opt
+            gk_new[i_k] = k_grid[i_k′_opt]
+            gc_new[i_k] = f(k; m) + (1 - δ) * k - gk_new[i_k]
+        end
+
+        dist = maximum(abs, V_new - m.V)
+        m.V .= V_new
+        m.gk .= gk_new
+        m.gc .= gc_new
+        iter += 1
+    end
+
+    if verbose
+        if iter == max_iter
+            println("Warning: Maximum iterations reached.")
+        else
+            println("Converged in $iter iterations.")
+        end
+    end
+
+    return nothing
+end
+
+m = DeterministicModel()
+vfi!(m)
+```
+
+```{julia}
+#| label: fig-vfi
+#| fig-cap: Value Function Computed by Value Function Iteration (VFI).
+#| code-fold: true
+plot(m.k_grid, m.V, label=false, xlabel=L"Capital $k$", ylabel=L"Value $V(k)$")
+```
+
+なお, 各イタレーションでは, $k$ に対する最適な $k'$ や $c$ を求めています. それらを記録しておくことで, 政策関数 $c = g_c(k)$ や $k' = g_k(k)$ を求めることができます.
+
+```{julia}
+#| label: fig-policy-function
+#| fig-cap: Policy Function Computed by Value Function Iteration (VFI).
+#| code-fold: true
+p1 = plot(m.k_grid, m.gc, label=false, xlabel=L"Capital $k$", ylabel=L"Consumption $c$")
+p2 = plot(m.k_grid, m.gk, label=false, xlabel=L"Capital $k$", ylabel=L"Next Capital $k'$")
+plot(p1, p2, layout=(1, 2))
+```
+
+これを見ると, 政策関数の計算精度がやや低いことがわかります. グリッドポイントを増やす, 補完を用いるなどの工夫で対処できますが, より高速で高精度な方法として, 次に紹介する Policy Function Iteration を用いる方法があります.
+
+### Policy Function Iteration
+
+上記のベルマン方程式から, 以下のオイラー方程式が導出されます.
+
+$$
+u'(c) = \beta u'(c')\left(f'(k') + (1-\delta)\right).
+$$
+
+ここで, 政策関数 $c' = g_c(k')$ と予算制約 $k' = f(k) + (1-\delta)k - c$ を導入すると, 上記のオイラー方程式は以下のように書き換えられます.
+
+$$
+u'(c) = \beta u'(g_c(f(k) + (1-\delta)k - c))\left(f'(f(k) + (1-\delta)k - c) + (1-\delta)\right).
+$$
+
+この時, $g_c^{0}(k)$ を所与とした時に $c$ について解くと新しい政策関数 $g_c^{1}(k)$ が得られます. この政策関数繰り返し更新することで, 政策関数の不動点を求めることができます.
+
+::: {.callout-note}
+
+## Policy Function Iteration
+
+1. $k$ の定義域を $[k_{\min}, k_{\max}]$ を $n$ 個のグリッドポイントに分割する
+1. $g_c(k)$ の初期値 $g_c^0$ を適当に設定する. つまり, $g_c^0 = (g_{c,0}^0, g_{c,1}^0, \dots, g_{c,n}^0)$ に適当な値を設定する.
+1. $g_c^0$ をオイラー方程式の右辺に代入し, 各 $k_i$ に対して $g_{c,i}^1$ を計算する.
+1. 2-3を繰り返す. 収束条件は以下のように設定する.
+    - $|g_c^N - g_c^{N-1}| < \varepsilon$   
+    - $|g_c^N - g_c^{N-1}|$ はベクトルのノルム
+    - $\varepsilon$ は十分小さな値を設定する. 例えば, $\epsilon = 10^{-6}$ とする
+:::
+
+また, ここから $k' := g_k(k) = f(k) + (1-\delta)k - g_c(k)$ が求められます. 
+
+```{julia}
+#| label: pfi-deterministic
+function euler_eq(c, k, gc_interp; m::DeterministicModel)
+    (; β, δ, k_grid) = m
+
+    k′ = max(f(k; m) + (1 - δ) * k - c, k_grid[begin])
+    c′ = gc_interp(k′)
+
+    return u′(c) - β * u′(c′) * (f′(k′; m) + 1 - δ)
+end
+
+function pfi!(m::DeterministicModel; tol=1e-6, max_iter=1000, verbose=true)
+    (; k_min, k_max, k_grid, α, β, δ) = m
+
+    gc_new = similar(m.gc)
+    iter, dist = 0, Inf
+    while dist > tol && iter < max_iter
+
+        gc_interp = linear_interpolation(k_grid, m.gc)
+
+        for (i_k, k) in enumerate(k_grid)
+            c_min = max(1e-9, f(k; m) + (1 - δ) * k - k_grid[end])
+            c_max = f(k; m) + (1 - δ) * k - k_grid[begin]
+            ee_left = euler_eq(c_min, k, gc_interp; m)
+            ee_right = euler_eq(c_max, k, gc_interp; m)
+            if ee_left > 0 && ee_right > 0
+                gc_new[i_k] = c_max
+            elseif ee_left < 0 && ee_right < 0
+                gc_new[i_k] = c_min
+            else
+                gc_new[i_k] = find_zero(c -> euler_eq(c, k, gc_interp; m), (c_min, c_max))
+            end
+        end
+
+        dist = maximum(abs, gc_new .- m.gc)
+        m.gc .= gc_new
+        iter += 1
+    end
+
+    m.gk .= f.(k_grid; m) .+ (1 .- δ) .* k_grid .- m.gc
+    if verbose
+        if iter == max_iter
+            println("Warning: Maximum iterations reached.")
+        else
+            println("Converged in $iter iterations.")
+        end
+    end
+
+    return nothing
+end
+
+m = DeterministicModel()
+pfi!(m)
+```
+
+```{julia}
+#| label: fig-policy-function-pfi
+#| fig-cap: Policy Function Computed by Policy Function Iteration (PFI).
+#| code-fold: true
+p1 = plot(m.k_grid, m.gc, label=false, xlabel=L"Capital $k$", ylabel=L"Consumption $c$")
+p2 = plot(m.k_grid, m.gk, label=false, xlabel=L"Capital $k$", ylabel=L"Next Capital $k'$")
+plot(p1, p2, layout=(1, 2))
+```
+
+さらに, $g_c(k), g_k(k)$ から価値関数 $V(k)$ を求める方法は主に2つあります.
+
+1. $V(k) \leftarrow u(g_c(k)) + \beta V(g_k(k))$ を用いて $V(k)$ の不動点を求める方法 (VFI)
+1. 線形方程式
+    1. 離散化された $k$ から $k'$ への遷移行列 $P$ を求める. グリッド $k_i$ が $k_j$ と $k_{j+1}$ の間に遷移する場合, 以下のように定義します.
+        - $P_{i, j} = \frac{k_{j+1} - g_k(k_i)}{k_{j+1} - k_j}$
+        - $P_{i, j+1} = \frac{g_k(k_i) - k_j}{k_{j+1} - k_j}$
+        - $P_{i, k} = 0$, $k \neq j, j+1$
+    1. $u, V$ を $u(g_c(k)), V(k)$ からなる離散化されたベクトルとすると, $V = u + \beta P V$ となる
+    1. $V = (I - \beta P)^{-1} u$ により $V$ を求めることができる
+
+ここでは, より高速な線型方程式を用いる方法を実装します. より速度を求める場合, 遷移行列はほとんどの要素がゼロであるため, 疎行列 (Sparse Matrix) を用いることで高速化する可能性があります. Juliaの場合, `SparseArrays.jl` で実装されています.
+
+```{julia}
+#| label: fig-pfi-vf
+#| fig-cap: Value Function from PFI and Linear Equation
+function compute_vf!(m::DeterministicModel)
+    (; n_k, k_grid, gc, gk, β, δ) = m
+    P = zeros(n_k, n_k)
+    for (i_k, k) in enumerate(k_grid)
+        k′ = gk[i_k]
+        j = searchsortedlast(k_grid, k′)
+        if j == 0
+            P[i_k, 1] = 1.0
+        elseif j == n_k
+            P[i_k, n_k] = 1.0
+        else
+            P[i_k, j] = (k_grid[j+1] - k′) / (k_grid[j+1] - k_grid[j])
+            P[i_k, j+1] = (k′ - k_grid[j]) / (k_grid[j+1] - k_grid[j])
+        end
+    end
+
+    m.V .= (I - β * P) \ (u.(gc))
+
+    return nothing
+end
+
+compute_vf!(m)
+plot(m.k_grid, m.V, label=false, xlabel=L"Capital $k$", ylabel=L"Value $V(k)$")
+```
+
+また, VFIよりもPFIの方が実行速度が速いことも確認できます.
+
+```{julia}
+#| label: bm-vfi
+@benchmark vfi!(m, verbose=false) setup = (m = DeterministicModel())
+```
+
+```{julia}
+#| label: bm-pfi
+@benchmark (pfi!(m, verbose=false); compute_vf!(m)) setup = (m = DeterministicModel())
+```
+
+## Stochastic Case
+
+$V(k, z)$ の数値計算するためには, $z$ の状態空間も離散化する必要があります. この時, 同時に確率過程 (AR(1) process) も離散化, つまりマルコフ過程として近似する必要があります. ここで, $z = z_1, \dots, z_J$ に離散化し, 各状態間の遷移確率を $J \times J$ 行列の $\Lambda$ とします. すると, ベルマン方程式は以下のようになります.
+
+$$
+V(k, z) = \max_{k'} \left\{u(f(k, z) + (1-\delta)k - k') + \beta \sum_{z'} \Lambda(z, z') V(k', z')\right\}.
+$$
+
+これはただ足し算の回数が増えただけで, 基本的には確定的な場合と同じです. AR(1) プロセスを離散化する方法として, ここでは Tauchen Method [@tauchen1986] を用います.
+
+### Tauchen Method
+
+実数列 $x_t$ が以下のAR(1)過程に従うとします.
+
+$$
+x_{t+1} = (1 - \rho) \mu + \rho x_t + \sigma \varepsilon_{t+1}, \quad \varepsilon_{t+1} \sim \mathcal{N}(0, 1).
+$$
+
+これを $n$ 個のグリッドポイント $\{x_1, \dots, x_n\}$ におけるマルコフ過程として離散化することを考えます. すなわち, 以下のような遷移確率行列 $\Lambda$ を考えます.
+
+$$
+\begin{pmatrix}
+x_{1, t+1} \\
+\vdots \\
+x_{n, t+1}
+\end{pmatrix} =
+\begin{pmatrix}
+\lambda_{1, 1} & \cdots & \lambda_{1, n} \\
+\vdots & \ddots & \vdots \\
+\lambda_{n, 1} & \cdots & \lambda_{n, n}
+\end{pmatrix}
+\begin{pmatrix}
+x_{1, t} \\
+\vdots \\
+x_{n, t}
+\end{pmatrix}
+$$
+
+ここで, $\lambda_{i, j} = \Pr(x_{t+1} = x_j \mid x_t = x_i)$ であり, $\sum_{j=1}^{n} \lambda_{i, j} = 1$ が成り立ちます.
+この遷移確率行列を求める方法として, Tauchen Method が知られています.
+
+::: {.callout-note}
+
+## Tauchen Method
+
+1. $x$ の定義域 を $[x_{\min}, x_{\max}]$ を $n$ 個のグリッドポイントに分割する. 通常は $x$ が従う分布の $3\sigma$ 程度の範囲を考える.
+1. グリッドポイント $x_i$ から $x_j$ に遷移する確率を以下のように定義する.
+
+$$
+\begin{aligned}
+\lambda_{i, 1} &= \Phi\left(\frac{x_1 + \frac{d}{2} - (1 - \rho) \mu - \rho x_i}{\sigma}\right) \\
+\lambda_{i, j} &= \Phi\left(\frac{x_j + \frac{d}{2} - (1 - \rho) \mu - \rho x_i}{\sigma}\right) - \Phi\left(\frac{x_{j} - \frac{d}{2} - (1 - \rho) \mu - \rho x_i}{\sigma}\right) & (2 \leq j \leq n-1) \\
+\lambda_{i, n} &= 1 - \Phi\left(\frac{x_{n} - \frac{d}{2} - (1 - \rho) \mu - \rho x_i}{\sigma}\right)
+\end{aligned}
+$$
+
+:::
+
+![**Visualization of Tauchen Method**. $\mu = 0$.](/static/cetz/tauchen_method.svg){#fig-tauchen-method width=100%}
+
+```{julia}
+#| label: tauchen-method
+function tauchen_method(; n_std=3.0, n=5, ρ=0.9, μ=0.1, σ=1.0)
+
+    x_min = μ - n_std * sqrt(σ^2 / (1 - ρ^2))
+    x_max = μ + n_std * sqrt(σ^2 / (1 - ρ^2))
+    x = range(x_min, x_max, length=n)
+
+    d = (x_max - x_min) / (n - 1)
+    Λ = zeros(n, n)
+    for i in 1:n
+        Λ[i, 1] = cdf(Normal(0.0, σ), x[1] + d / 2 - (1 - ρ) * μ - ρ * x[i])
+        Λ[i, n] = 1 - cdf(Normal(0.0, σ), x[n] - d / 2 - (1 - ρ) * μ - ρ * x[i])
+        for j in 2:n-1
+            Λ[i, j] = cdf(Normal(0.0, σ), x[j] + d / 2 - (1 - ρ) * μ - ρ * x[i]) -
+                      cdf(Normal(0.0, σ), x[j] - d / 2 - (1 - ρ) * μ - ρ * x[i])
+        end
+    end
+
+    return x, Λ
+end
+
+
+x, Λ = tauchen_method()
+@show x
+Λ
+```
+
+実用上は `QuantEcon.jl` の `tauchen` 関数を利用するのがいいでしょう.
+
+```{julia}
+mc = tauchen(5, 0.9, 1.0, 0.1) # tauchen(N, ρ, σ, μ)
+@show mc.state_values
+mc.p
+```
+
+ただし, ここでは AR(1) process が以下のように定義されていることに注意してください.
+
+$$
+y_{t+1} = \mu + \rho y_{t} + \varepsilon_{t+1}, \quad \varepsilon_{t+1} \sim \mathcal{N}(0, \sigma^2).
+$$
+
+そのため, $\mathbb{E}[y_{t}] = \frac{\mu}{1-\rho}$ となります.
+上の例では, $\mu = 0.1$, $\rho = 0.9$, $\sigma = 1.0$ としているため, $\mathbb{E}[y_{t}] = 1.0$ となります.
+
+```{julia}
+ps = vcat(stationary_distributions(mc)...)
+ps' * collect(mc.state_values)
+```
+
+AR(1) processの期待値を任意の値 $\tilde{\mu}$ に設定するためには, $\mu = (1-\rho)\tilde{\mu}$ とすればよいです.
+
+```{julia}
+mc = tauchen(5, 0.9, 1.0, 0.01)
+@show mc.state_values
+mc.p
+```
+
+### Policy Function Iteration
+
+AR(1) process を $\Lambda$ で離散化した後のベルマン方程式は以下のようになります.
+
+$$
+V(k, z) = \max_{k'} \left\{u(f(k, z) + (1-\delta)k - k') + \beta \sum_{z'} \Lambda(z, z') V(k', z')\right\}.
+$$
+
+VFIを用いる場合, 実装は価値関数 $V$ の次元を $z$ のために1つ増やし, ベルマン方程式の通り実装するだけです. 実装はあまり難しくありませんが, 精度があまり良くないためここでは紹介しません. 気になる場合は [マクロIVの講義資料](https://kazuyanagimoto.com/course-kobe-macro4-2025/lecture/01-3-dynamic-model.html#value-function-iteration-2) を参考にしてください.
+
+PFIを用いる場合, オイラー方程式は以下のようになります.
+
+$$
+u'(c) = \beta \sum_{z'} \Lambda(z, z') u'(c')(f'(k', z') + (1-\delta)).
+$$
+
+```{julia}
+#| label: model-stochastic
+@kwdef struct StochasticModel{TF<:AbstractFloat,TI<:Integer}
+    # Parameters
+    α::TF = 0.36
+    β::TF = 0.96
+    δ::TF = 0.1
+    # AR(1) process
+    ρ::TF = 0.95
+    μ::TF = 0.0
+    σ::TF = 0.05
+
+    # Policy and Value Functions
+    n_k::TI = 101
+    n_z::TI = 5
+    k_min::TF = 0.5
+    k_max::TF = 10.0
+    k_grid::Vector{TF} = collect(range(k_min, k_max, length=n_k))
+    mc::MarkovChain = tauchen(n_z, ρ, σ, μ)
+    z_grid::Vector{TF} = collect(exp.(mc.state_values))
+    Λ::Matrix{TF} = mc.p
+    V::Matrix{TF} = zeros(n_k, n_z)
+    gc::Matrix{TF} = fill(z_grid[begin] * k_min^α / 2, n_k, n_z)
+    gk::Matrix{TF} = zeros(n_k, n_z)
+end
+
+f(k, z; m::StochasticModel) = z * k^m.α
+f′(k, z; m::StochasticModel) = m.α * z * k^(m.α - 1)
+
+function euler_eq(c, k, i_z, gc_interp; m::StochasticModel)
+    (; β, δ, k_grid, z_grid, Λ) = m
+
+    RHS = 0.
+    for (i_z′, z′) in enumerate(z_grid)
+        k′ = max(f(k, z_grid[i_z]; m) + (1 - δ) * k - c, k_grid[begin])
+        c′ = gc_interp(k′, z′)
+        RHS += Λ[i_z, i_z′] * (u′(c′) * (f′(k′, z′; m) + 1 - δ))
+    end
+    return u′(c) - β * RHS
+end
+
+function pfi!(m::StochasticModel; tol=1e-6, max_iter=1000, verbose=true)
+    (; n_k, n_z, k_min, k_max, k_grid, z_grid, α, β, δ, Λ) = m
+
+    gc_new = similar(m.gc)
+
+    if all(m.gc .== 0)
+        m.gc .= f.(k_grid, z_grid'; m) .+ (1 - δ) .* k_grid .- k_grid
+        m.gc .= max.(m.gc, 1e-5)
+    end
+
+    iter, dist = 0, Inf
+    while dist > tol && iter < max_iter
+
+        gc_interp = linear_interpolation((k_grid, z_grid), m.gc)
+
+        for (i_k, k) in enumerate(k_grid), (i_z, z) in enumerate(z_grid)
+            c_min = max(1e-9, f(k, z; m) + (1 - δ) * k - k_grid[end])
+            c_max = f(k, z; m) + (1 - δ) * k - k_grid[begin]
+            ee_left = euler_eq(c_min, k, i_z, gc_interp; m)
+            ee_right = euler_eq(c_max, k, i_z, gc_interp; m)
+            if ee_left > 0 && ee_right > 0
+                gc_new[i_k, i_z] = c_max
+            elseif ee_left < 0 && ee_right < 0
+                gc_new[i_k, i_z] = c_min
+            else
+                gc_new[i_k, i_z] = find_zero(c -> euler_eq(c, k, i_z, gc_interp; m), (c_min, c_max))
+            end
+        end
+
+        dist = maximum(abs, gc_new .- m.gc)
+        m.gc .= gc_new
+        iter += 1
+    end
+    m.gk .= f.(k_grid, z_grid'; m) .+ (1 .- δ) .* k_grid .- m.gc
+
+    if verbose
+        if iter == max_iter
+            println("Warning: Maximum iterations reached.")
+        else
+            println("Converged in $iter iterations.")
+        end
+    end
+
+    # Value Function
+    P = zeros(n_k * n_z, n_k * n_z)
+    for (i_k, k) in enumerate(k_grid), (i_z, z) in enumerate(z_grid)
+        g = f(k, z; m) + (1 - δ) * k - m.gc[i_k, i_z]
+        j = searchsortedlast(k_grid, g)
+        for (i_z′, z′) in enumerate(z_grid)
+            if j == 1 || j == n_k
+                P[i_k+(i_z-1)*n_k, j+(i_z′-1)*n_k] = Λ[i_z, i_z′]
+            else
+                P[i_k+(i_z-1)*n_k, j+(i_z′-1)*n_k] =
+                    Λ[i_z, i_z′] * (k_grid[j+1] - g) / (k_grid[j+1] - k_grid[j])
+                P[i_k+(i_z-1)*n_k, j+1+(i_z′-1)*n_k] =
+                    Λ[i_z, i_z′] * (g - k_grid[j]) / (k_grid[j+1] - k_grid[j])
+            end
+        end
+    end
+
+    Ṽ = (I - β * P) \ [u(m.gc[i_k, i_z]) for i_z in 1:n_z for i_k in 1:n_k]
+    m.V .= reshape(Ṽ, n_k, n_z)
+
+    return nothing
+end
+
+m = StochasticModel()
+pfi!(m)
+```
+
+```{julia}
+#| label: fig-policy-function-stochastic
+#| fig-cap: Policy Function Computed by Value Function Iteration (VFI) in Stochastic Case.
+#| code-fold: true
+p1 = plot(m.k_grid, m.gc[:, 5], label=L"z_5", xlabel=L"Capital $k$", ylabel=L"Consumption $c$")
+for i in 4:-1:1
+    plot!(m.k_grid, m.gc[:, i], label=L"z_%$i")
+end
+p2 = plot(m.k_grid, m.gk[:, 5], label=L"z_5", xlabel=L"Capital $k$", ylabel=L"Next Capital $k'$")
+for i in 4:-1:1
+    plot!(m.k_grid, m.gk[:, i], label=L"z_%$i")
+end
+plot(p1, p2, layout=(1, 2))
+```
+
+ここから価値関数を求めるアルゴリズムは以下のような手順になります.
+
+- $V(k, z)$ は離散化されたグリッド上の行列 $\{V_{i_k, i_z}\}_{i_k = 1,\dots,n_k, i_z=1,\dots,n_z}$ である
+- $\{V_{i_k, i_z}\}$ をベクトル化した $\widetilde{V}$ を考える. $\widetilde{V}_{i_k + n_k(i_z - 1)} := V_{i_k, i_z}$
+- ある $i_k, i_z$ に対して, $k_{j} < g_{i_k, i_z} < k_{j+1}$ を満たす $j \in \{1,\dots,n_k\}$ を求める
+- $(k, z)$ から $(k', z')$ への遷移は, $\widetilde{V}$ 上で $i_k + n_k(i_z - 1)$ から $i_{k'} + n_k(i_{z'} - 1)$ への遷移
+- 遷移行列 $P$ は以下のように定義され, 定義されていない要素は 0 とする.
+
+$$
+\begin{aligned}
+P_{i_k + n_k(i_z - 1), j + n_k(i_{z'} - 1)} &= \begin{cases}
+\Lambda_{i_z, i_{z'}} \frac{k_{j+1}-g_{i_k, i_z}}{k_{j+1} - k_j} & \text{ if } 1 < j < n_k \\
+\Lambda_{i_z, i_{z'}} & \text{otherwise}.
+\end{cases}\\
+P_{i_k + n_k(i_z - 1), j + 1 + n_k(i_{z'} - 1)} &= \begin{cases}
+\Lambda_{i_z, i_{z'}} \frac{g_{i_k, i_z} - k_{j}}{k_{j+1} - k_j} & \text{ if } 1 < j < n_k \\
+\Lambda_{i_z, i_{z'}} & \text{otherwise}.
+\end{cases}\\
+\end{aligned}
+$$
+
+```{julia}
+#| label: fig-model-stochastic
+#| fig-cap: Value Function Computed by Value Function Iteration (VFI) in Stochastic Case.
+#| code-fold: true
+p = plot(m.k_grid, m.V[:, 5], label=L"z_5", xlabel=L"Capital $k$", ylabel=L"Value $V(k, z)$")
+for i in 4:-1:1
+    plot!(m.k_grid, m.V[:, i], label=L"z_%$i")
+end
+p
+```

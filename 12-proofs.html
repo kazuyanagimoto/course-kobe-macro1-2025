@@ -241,6 +241,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./14-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Dynamic Programming</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">参考文献</span></a>
   </div>
@@ -258,11 +264,7 @@ window.Quarto = {
    
   <ul>
   <li><a href="#rbc-model" id="toc-rbc-model" class="nav-link active" data-scroll-target="#rbc-model"><span class="header-section-number">B.1</span> RBC Model</a></li>
-  <li><a href="#new-keynesian-model" id="toc-new-keynesian-model" class="nav-link" data-scroll-target="#new-keynesian-model"><span class="header-section-number">B.2</span> New Keynesian Model</a>
-  <ul class="collapse">
-  <li><a href="#ces生産関数における価格指数" id="toc-ces生産関数における価格指数" class="nav-link" data-scroll-target="#ces生産関数における価格指数"><span class="header-section-number">B.2.1</span> CES生産関数における価格指数</a></li>
-  <li><a href="#対数線形化" id="toc-対数線形化" class="nav-link" data-scroll-target="#対数線形化"><span class="header-section-number">B.2.2</span> 対数線形化</a></li>
-  </ul></li>
+  <li><a href="#new-keynesian-model" id="toc-new-keynesian-model" class="nav-link" data-scroll-target="#new-keynesian-model"><span class="header-section-number">B.2</span> New Keynesian Model</a></li>
   <li><a href="#dmp-framework" id="toc-dmp-framework" class="nav-link" data-scroll-target="#dmp-framework"><span class="header-section-number">B.3</span> DMP Framework</a></li>
   </ul>
 </nav>
@@ -294,10 +296,8 @@ window.Quarto = {
 </section>
 <section id="new-keynesian-model" class="level2" data-number="B.2">
 <h2 data-number="B.2" class="anchored" data-anchor-id="new-keynesian-model"><span class="header-section-number">B.2</span> New Keynesian Model</h2>
-<section id="ces生産関数における価格指数" class="level3" data-number="B.2.1">
-<h3 data-number="B.2.1" class="anchored" data-anchor-id="ces生産関数における価格指数"><span class="header-section-number">B.2.1</span> CES生産関数における価格指数</h3>
 <div id="prp-price-index" class="theorem proposition">
-<p><span class="theorem-title"><strong>命題 B.1</strong></span> 最終財の価格 <span class="math inline">\(P_t\)</span> は中間財の価格 <span class="math inline">\(P_{j, t}\)</span> を用いて以下のように表される:</p>
+<p><span class="theorem-title"><strong>命題 B.1 (CES生産関数における価格指数)</strong></span> 最終財の価格 <span class="math inline">\(P_t\)</span> は中間財の価格 <span class="math inline">\(P_{j, t}\)</span> を用いて以下のように表される:</p>
 <p><span class="math display">\[
 P_t = \left(\int_{0}^{1} P_{j, t}^{1-\varepsilon} \, dj \right)^{\frac{1}{1-\varepsilon}}.
 \]</span></p>
@@ -339,10 +339,6 @@ P_{j, t} &amp;= \lambda_t \underbrace{\left(\int_{0}^{1} Y_{j, t}^{\frac{\vareps
 Y_{j, t} = \left(\frac{P_{j, t}}{P_t}\right)^{-\varepsilon} Y_t.
 \]</span></p>
 </div>
-</section>
-<section id="対数線形化" class="level3" data-number="B.2.2">
-<h3 data-number="B.2.2" class="anchored" data-anchor-id="対数線形化"><span class="header-section-number">B.2.2</span> 対数線形化</h3>
-<p>ここでは <span class="math inline">\(\hat{x}_t := \log x_t - \log x\)</span> とします. また, <span class="math inline">\(\log (1 + x_t) \approx x_t\)</span> という近似を用います.</p>
 <div id="prp-lin-nkis" class="theorem proposition">
 <p><span class="theorem-title"><strong>命題 B.2 (New Keynesian IS Curveの対数線形化)</strong></span> <span class="math display">\[
 C_t^{-\sigma} = \beta \mathbb{E}_t\left[\frac{1+i_t}{1+\pi_{t+1}}C_{t+1}^{-\sigma}\right]
@@ -512,7 +508,6 @@ MC^r_t = A_t^{-(\phi+1)} Y_t^{\sigma + \phi}.
 \end{aligned}
 \]</span></p>
 </div>
-</section>
 </section>
 <section id="dmp-framework" class="level2" data-number="B.3">
 <h2 data-number="B.3" class="anchored" data-anchor-id="dmp-framework"><span class="header-section-number">B.3</span> DMP Framework</h2>

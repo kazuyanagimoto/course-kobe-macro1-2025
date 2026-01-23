@@ -1024,7 +1024,7 @@ J(z) &amp;= V(z) + (1-\gamma) \mathcal{S}(z).
 <span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="tbl-dmp-stats" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-colwidths="[25,5,10,10,10,10]" data-execution_count="1">
+<div id="tbl-dmp-stats" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="1" data-tbl-colwidths="[25,5,10,10,10,10]">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dmp-stats-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 表&nbsp;3.3: Model Statistics
@@ -1245,7 +1245,7 @@ Parameter values for the RBC+DMP model
 
 ### Simulation
 
-```etdkpxo
+```lcbygnu
 #| label: mdl-dmp-rbc
 #| code-fold: show
 #| output: false
@@ -1303,17 +1303,17 @@ end
 end
 ```
 
-```etdkpxo
+```lcbygnu
 #| label: irf-dmp-rbc
 #| code-fold: true
 plot_irf(RBC_DMP; periods=200, variables=[:z, :u, :θ, :v]);
 ```
 
-```etdkpxo
+```lcbygnu
 plot_irf(RBC_DMP; periods=200, variables=[:N, :Y, :C, :I]);
 ```
 
-```etdkpxo
+```lcbygnu
 #| label: tbl-dmp-rbc-stats
 #| code-fold: true
 #| tbl-cap: "Model Statistics for RBC+DMP Model: Labor Market"

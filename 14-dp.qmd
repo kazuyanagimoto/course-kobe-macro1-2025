@@ -28,7 +28,7 @@ default(size=(500, 309), titlefontsize=10, fmt=:svg, grid=false,
 この章では, 動的計画法 (Dynamic Programming) による非線形モデルの数値解法について学びます.　次のベルマン方程式を解くことを考えます.
 
 $$
-V(k, z) = \max_{k'} U\left(zf(k) + (1-\delta)k - k', 1-n\right) + \beta \mathbb{E}[V(k', z') | z].
+V(k, z) = \max_{k'} U\left(zf(k) + (1-\delta)k - k'\right) + \beta \mathbb{E}[V(k', z') | z].
 $$
 
 subject to

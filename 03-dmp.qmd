@@ -371,7 +371,7 @@ df_irf = DataFrame(
     :z => z_path .* 100,
     :θ => θ_path .* 100,
 )
-CSV.write(@projectroot("data", "dmp_irf.csv"), df_irf)
+CSV.write(@projectroot("output", "dmp_irf.csv"), df_irf)
 
 # Beveridge Curve
 pars = Dict(p[1] => p[2] for p in get_parameters(DMP, values=true))
@@ -386,7 +386,7 @@ df_bc = DataFrame(
     :u => (u_bc .- u_ss) ./ u_ss * 100,
     :v => (v_bc .- v_ss) ./ v_ss * 100
 )
-CSV.write(@projectroot("data", "dmp_bc.csv"), df_bc)
+CSV.write(@projectroot("output", "dmp_bc.csv"), df_bc)
 ```
 
 <style>
@@ -399,8 +399,8 @@ CSV.write(@projectroot("data", "dmp_bc.csv"), df_bc)
 //| label: ojs-irf-uv
 //| echo: false
 
-irf = FileAttachment("data/dmp_irf.csv").csv({ typed: true })
-bc = FileAttachment("data/dmp_bc.csv").csv({ typed: true })
+irf = FileAttachment("output/dmp_irf.csv").csv({ typed: true })
+bc = FileAttachment("output/dmp_bc.csv").csv({ typed: true })
 u_min = -0.3
 u_max = 0.3
 

@@ -294,13 +294,13 @@ $$
 
 ここで, $I := (1+r)a - a'$ と置くと, 静学的な労働供給モデル (-@eq-labor-static) と同じ形になります. 動学的な労働供給モデルにおける賃金弾力性には, 主に次の3種類があります.
 
-1. Marshallian 弾力性: 所得を一定とした下での労働供給の弾力性
+1. Marshallian 弾力性: 非労働所得を一定とした下での労働供給の弾力性
 2. Hicksian 弾力性: 効用のレベルを一定とした下での労働供給の弾力性
 3. Frisch 弾力性: 限界効用を一定にした下での労働供給の弾力性
 
 **Marshallian & Hicksian Elasticities**
 
-Marshallian 弾力性は, 静学的な労働供給と同様に定義することが可能です. 直感的には, 賃金が下落した際に貯金を切り崩すといった埋め合わせ (compensation) 行動は可能ですが, その点を考慮せずに, 所得 $I$ を一定とした下での労働供給の弾力性として定義されます. その意味でMarshallian 弾力性は uncompesated elasticity とも呼ばれます.
+Marshallian 弾力性は, 静学的な労働供給と同様に定義することが可能です. 直感的には, 賃金が下落した際に貯金を切り崩すといった埋め合わせ (compensation) 行動は可能ですが, その点を考慮せずに, 非労働所得 $I$ を一定とした下での労働供給の弾力性として定義されます. その意味でMarshallian 弾力性は uncompesated elasticity とも呼ばれます.
 
 Hicksian 弾力性も静学的な労働供給と同様に定義することが可能です. 賃金が下落した際に貯金を切り崩すことで効用水準を一定に保つ状況を考えるという意味で, Hicksian 弾力性は compensated elasticity とも呼ばれます.
 
@@ -317,7 +317,7 @@ $$
 $$
 
 - 代替効果: $\eta_{h, w}^H = \frac{1}{\frac{1}{\gamma} + \sigma(1-s)}$
-- 所得効果: $\eta_{h, I}\frac{wh}{I} = -\frac{\sigma - \sigma s}{\frac{1}{\gamma} + \sigma(1-s)}$
+- 所得効果: $\eta_{h, I}\frac{wh}{I} = -\frac{\sigma(1 - s)}{\frac{1}{\gamma} + \sigma(1-s)}$
 
 ここで $s = \frac{I}{c}$ とおいた.
 
@@ -419,6 +419,20 @@ $$
 - **マクロモデル**: 2.84
 
 マクロモデルの結果は, RBCモデルなどで雇用は実質賃金よりも volatile であることを反映しています. この「マクロモデルの Frisch 弾力性はミクロ分析よりもかなり大きい」というPuzzleに関しては今も議論が続いています (e.g., @erosa2016).
+
+**３つの弾力性**
+
+一般的なマクロモデルにおいて, ３つの弾力性は次の関係を満たします.
+
+$$
+\eta_{h, w}^{F} \geq \eta_{h, w}^{H} \geq \eta_{h, w}^{M}.
+$$
+
+$\eta_{h, w}^{H} \geq \eta_{h, w}^M$ は, 所得効果が通常負であることから自明です. また, $\eta_{h, w}^F$ は wealth effect を無視しているため, 最も値が大きくなります. 直感的には, 賃金が上昇したときに現在の効用レベルを変えないのなら, 必要な wealth が減少し, 労働供給を減らすインセンティブが生まれるからです. 実際, @exm-labor-crra において次の式が成り立っています.
+
+$$
+\frac{1}{\eta_{h, w}^H} = \frac{1}{\eta_{h, w}^F} + \sigma\frac{wh}{c}.
+$$
 
 ## Root Finding
 

@@ -357,19 +357,24 @@ plot_irf(DMP, variables=[:u, :v, :z, :θ], periods=100);
 ```{julia}
 #| label: dmp-irf-data
 #| include: false
-irf = get_irf(DMP, variables=[:u, :v, :z, :θ], periods=100)
+irf = get_irf(DMP, variables=[:u, :v, :z, :θ], periods=100, levels=true)
 ss = get_steady_state(DMP)(:, :Steady_state)
-u_path = [0.0; collect(irf(:u, :, :ε)) ./ ss(:u)]
-v_path = [0.0; collect(irf(:v, :, :ε)) ./ ss(:v)]
-z_path = [0.0; collect(irf(:z, :, :ε)) ./ ss(:z)]
-θ_path = [0.0; collect(irf(:θ, :, :ε)) ./ ss(:θ)]
+u_ss = ss(:u)
+v_ss = ss(:v)
+z_ss = ss(:z)
+θ_ss = ss(:θ)
+
+u_path = [u_ss; collect(irf(:u, :, :ε))]
+v_path = [v_ss; collect(irf(:v, :, :ε))]
+z_path = [z_ss; collect(irf(:z, :, :ε))]
+θ_path = [θ_ss; collect(irf(:θ, :, :ε))]
 
 df_irf = DataFrame(
     :t => -1:(length(u_path)-2),
-    :u => u_path .* 100,
-    :v => v_path .* 100,
-    :z => z_path .* 100,
-    :θ => θ_path .* 100,
+    :u => u_path,
+    :v => v_path,
+    :z => z_path,
+    :θ => θ_path,
 )
 CSV.write(@projectroot("output", "dmp_irf.csv"), df_irf)
 
@@ -378,13 +383,12 @@ pars = Dict(p[1] => p[2] for p in get_parameters(DMP, values=true))
 σ = pars["σ"]
 χ = pars["χ"]
 η = pars["η"]
-u_ss = ss(:u)
-v_ss = ss(:v)
-u_bc = range(u_ss * (1 - 0.003), u_ss * (1 + 0.003), length=100)
+
+u_bc = range(u_ss * (1 - 0.0025), u_ss * (1 + 0.0025), length=100)
 v_bc = @. (σ * (1 - u_bc) / (χ * u_bc^η))^(1 / (1 - η))
 df_bc = DataFrame(
-    :u => (u_bc .- u_ss) ./ u_ss * 100,
-    :v => (v_bc .- v_ss) ./ v_ss * 100
+    :u => u_bc,
+    :v => v_bc
 )
 CSV.write(@projectroot("output", "dmp_bc.csv"), df_bc)
 ```
@@ -401,27 +405,35 @@ CSV.write(@projectroot("output", "dmp_bc.csv"), df_bc)
 
 irf = FileAttachment("output/dmp_irf.csv").csv({ typed: true })
 bc = FileAttachment("output/dmp_bc.csv").csv({ typed: true })
-u_min = -0.3
-u_max = 0.3
+u_ss = irf[0].u
+v_ss = irf[0].v
+u_min = d3.min(bc, d => d.u)
+u_max = d3.max(bc, d => d.u)
+v_bc_max = bc.find(d => d.u === u_max).v
+theta_max = d3.max(irf, d => d.θ)
+dy = (theta_max * u_max - v_ss) * 1.2
 
-jc = [{u: u_min, v: u_min}, {u: u_max, v: u_max}]
+jc = irf.flatMap(d => [{t: d.t, u: u_min, v: d.θ * u_min}, {t: d.t, u: u_max, v: d.θ * u_max}])
+current_jc_label = irf.map(d => ({t: d.t, u: u_max, v: d.θ * u_max}))
 
 Plot.plot({
   style: {fontSize: "16px"},
+  marginLeft: 70,
+  marginBottom: 45,
   grid: true,
   marks: [
     Plot.line(bc, {x: "u", y: "v", stroke: "gray", strokeDasharray: "4,4"}),
-    Plot.text([{u: 0.3, v: -0.6}], {x: "u", y: "v", text: ["BC"], dy: 20}),
-    Plot.line(jc, {x: "u", y: "v", stroke: "gray", strokeDasharray: "2,2"}),
-    Plot.text([{u: 0.3, v: 0.4}], {x: "u", y: "v", text: ["JC"], dy: 10}),
+    Plot.text([{u: u_max, v: v_bc_max}], {x: "u", y: "v", text: ["BC"], dy: 20}),
+    Plot.line(jc, {filter: d => d.t === t, x: "u", y: "v", stroke: "gray", strokeDasharray: "2,2"}),
+    Plot.text(current_jc_label, {filter: d => d.t === t, x: "u", y: "v", text: d => "JC", dy: -10, dx: -10}),
     Plot.line(irf, {filter: d => d.t >= 0 && d.t <= t, x: "u", y: "v", stroke: "#c2676d"}),
     Plot.dot(irf, {filter: d => d.t === t, x: "u", y: "v", fill: "#c2676d", r: 5}),
     Plot.text(irf, {filter: d => d.t === t, x: "u", y: "v", text: d => `t=${d.t}`, dy: -10}),
-    Plot.dot([{u: 0, v: 0}], {x: "u", y: "v", fill: "#0f6a81", r: 5}),
-    Plot.text([{u: 0, v: -0.1}], {x: "u", y: "v", text: ["SS"], dy: 10})
+    Plot.dot([{u: u_ss, v: v_ss}], {x: "u", y: "v", fill: "#0f6a81", r: 5}),
+    Plot.text([{u: u_ss, v: v_ss}], {x: "u", y: "v", text: ["SS"], dy: 20})
   ],
-  x: {label: "Unemployment (%Δ)", domain: [u_min, u_max], labelOffset: 1},
-  y: {label: "Vacancy (%Δ)", domain: [-1, 1], labelOffset: 1}
+  x: {label: "Unemployment", domain: [u_min, u_max], labelOffset: 35},
+  y: {label: "Vacancy", labelOffset: 1, domain: [v_ss - dy, v_ss + dy]}
 })
 
 viewof t = Inputs.range([-1, 99], {label: "t =", step: 1, value: -1})
